@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — FitClan</title>
+  <meta name="description" content="FitClan Privacy Policy — how we collect, use, and protect your data." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .legal-hero {
+      padding: 140px 0 60px;
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+    }
+    .legal-hero-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .legal-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 14px;
+      background: hsl(159,93%,50%,0.1);
+      border: 1px solid hsl(159,93%,50%,0.25);
+      border-radius: 50px;
+      font-size: .75rem; font-weight: 600; color: var(--teal);
+      margin-bottom: 20px;
+    }
+    .legal-title {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 12px;
+    }
+    .legal-meta {
+      font-size: .85rem;
+      color: var(--text-muted);
+    }
+    .legal-meta strong { color: var(--teal); }
+
+    .legal-body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 32px 120px;
+    }
+    .legal-toc {
+      background: hsl(240,3%,11%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 56px;
+    }
+    .legal-toc h3 {
+      font-family: var(--font-head);
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .legal-toc ol {
+      list-style: decimal;
+      padding-left: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 40px;
+    }
+    .legal-toc li { font-size: .875rem; }
+    .legal-toc a { color: var(--text-muted); transition: color .2s; }
+    .legal-toc a:hover { color: var(--teal); }
+
+    .legal-section {
+      margin-bottom: 52px;
+    }
+    .legal-section h2 {
+      font-family: var(--font-head);
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .legal-section h2 .sec-num {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--teal);
+      background: hsl(159,93%,50%,0.1);
+      border: 1px solid hsl(159,93%,50%,0.25);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-family: var(--font-head);
+    }
+    .legal-section h3 {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 24px 0 10px;
+      color: var(--text);
+    }
+    .legal-section p {
+      font-size: .93rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+    .legal-section ul, .legal-section ol {
+      padding-left: 20px;
+      margin-bottom: 14px;
+    }
+    .legal-section li {
+      font-size: .93rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 6px;
+    }
+    .legal-section li::marker { color: var(--teal); }
+    .legal-highlight {
+      background: hsl(159,93%,50%,0.07);
+      border-left: 3px solid var(--teal);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 20px;
+      margin: 20px 0;
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .legal-highlight strong { color: var(--text); }
+    .legal-warn {
+      background: hsl(0,100%,71%,0.07);
+      border-left: 3px solid var(--coral);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 20px;
+      margin: 20px 0;
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: .875rem;
+    }
+    .data-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: hsl(240,3%,13%);
+      border: 1px solid var(--border);
+      font-family: var(--font-head);
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+    }
+    .data-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      line-height: 1.6;
+      vertical-align: top;
+    }
+    .data-table tr:hover td { background: hsl(240,3%,11%); }
+    .tag-teal {
+      display: inline-block; padding: 1px 7px;
+      background: hsl(159,93%,50%,0.1); border: 1px solid hsl(159,93%,50%,0.25);
+      border-radius: 4px; font-size: .72rem; color: var(--teal); font-weight: 600;
+    }
+    .tag-coral {
+      display: inline-block; padding: 1px 7px;
+      background: hsl(0,100%,71%,0.1); border: 1px solid hsl(0,100%,71%,0.25);
+      border-radius: 4px; font-size: .72rem; color: var(--coral); font-weight: 600;
+    }
+    .contact-card {
+      background: linear-gradient(145deg, hsl(240,3%,13%), hsl(240,3%,9%));
+      border: 1px solid hsl(159,93%,50%,0.2);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-top: 20px;
+    }
+    .contact-card p { margin: 0; }
+    .contact-card a { color: var(--teal); }
+    .contact-card a:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .legal-toc ol { grid-template-columns: 1fr; }
+      .legal-body { padding: 40px 20px 80px; }
+      .legal-hero-inner { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav scrolled" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-icon">🏃</span>
+        <span class="logo-text">FitClan</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#features" class="nav-link">Features</a></li>
+        <li><a href="index.html#how" class="nav-link">How It Works</a></li>
+        <li><a href="index.html#download" class="nav-link">Download</a></li>
+      </ul>
+      <a href="index.html#download" class="nav-cta">
+        <span>Get the App</span>
+        <div class="btn-glow"></div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="legal-hero">
+    <div class="legal-hero-inner">
+      <div class="legal-badge">📄 Legal Document</div>
+      <h1 class="legal-title">Privacy Policy</h1>
+      <p class="legal-meta">
+        <strong>Effective date: May 8, 2026</strong> &nbsp;·&nbsp;
+        Last updated: May 8, 2026 &nbsp;·&nbsp;
+        Applies to: FitClan Android App &amp; fitclan.ca website
+      </p>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="legal-body">
+
+    <div class="legal-highlight">
+      <strong>Plain-English Summary:</strong> FitClan collects only the data needed to run a family fitness leaderboard — your account info, fitness activity data (steps, calories, distance), and family group data. We do not sell your data, show you ads, or share your data with third parties for marketing. Health and fitness data is used solely to calculate points and power the leaderboard.
+    </div>
+
+    <!-- TABLE OF CONTENTS -->
+    <div class="legal-toc">
+      <h3>Table of Contents</h3>
+      <ol>
+        <li><a href="#s1">Who We Are</a></li>
+        <li><a href="#s2">Data We Collect</a></li>
+        <li><a href="#s3">How We Use Your Data</a></li>
+        <li><a href="#s4">Health &amp; Fitness Data</a></li>
+        <li><a href="#s5">Children's Privacy</a></li>
+        <li><a href="#s6">Data Sharing</a></li>
+        <li><a href="#s7">Data Retention</a></li>
+        <li><a href="#s8">Security</a></li>
+        <li><a href="#s9">Your Rights</a></li>
+        <li><a href="#s10">Cookies &amp; Website</a></li>
+        <li><a href="#s11">Changes to This Policy</a></li>
+        <li><a href="#s12">Contact Us</a></li>
+      </ol>
+    </div>
+
+    <!-- 1 -->
+    <div class="legal-section" id="s1">
+      <h2><span class="sec-num">01</span> Who We Are</h2>
+      <p>FitClan ("we", "us", "our") is an independent mobile application and website operated by Nishant Mittal. FitClan is a free family fitness tracking and gamification app available on Android via the Google Play Store.</p>
+      <p>This Privacy Policy applies to:</p>
+      <ul>
+        <li>The <strong>FitClan Android application</strong></li>
+        <li>The <strong>FitClan website</strong> at fitclan.ca (and any subdomains)</li>
+        <li>Any related services, notifications, or communications from FitClan</li>
+      </ul>
+      <p>By using FitClan, you agree to the practices described in this Privacy Policy. If you do not agree, please discontinue use of the app and website.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="legal-section" id="s2">
+      <h2><span class="sec-num">02</span> Data We Collect</h2>
+      <p>We collect the minimum data necessary to provide the FitClan service. Here is a complete breakdown:</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Data Collected</th>
+            <th>Source</th>
+            <th>Required?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Account</strong></td>
+            <td>Email address, display name, optional profile photo</td>
+            <td>You provide directly</td>
+            <td><span class="tag-teal">Yes</span></td>
+          </tr>
+          <tr>
+            <td><strong>Fitness Data</strong></td>
+            <td>Step count, calories burned, distance walked/run, active minutes</td>
+            <td>Android Health Connect</td>
+            <td><span class="tag-teal">Yes</span></td>
+          </tr>
+          <tr>
+            <td><strong>Activity Logs</strong></td>
+            <td>Manually logged activities (type, duration, date)</td>
+            <td>You provide directly</td>
+            <td><span class="tag-coral">Optional</span></td>
+          </tr>
+          <tr>
+            <td><strong>Family Group</strong></td>
+            <td>Family name, member list (display names), points history, leaderboard data</td>
+            <td>Created by you in-app</td>
+            <td><span class="tag-teal">Yes</span></td>
+          </tr>
+          <tr>
+            <td><strong>Device Info</strong></td>
+            <td>Device OS version, app version — used for crash diagnostics only</td>
+            <td>Automatically collected</td>
+            <td><span class="tag-teal">Yes</span></td>
+          </tr>
+          <tr>
+            <td><strong>Push Tokens</strong></td>
+            <td>FCM (Firebase Cloud Messaging) device token for push notifications</td>
+            <td>Automatically collected on opt-in</td>
+            <td><span class="tag-coral">Optional</span></td>
+          </tr>
+          <tr>
+            <td><strong>Usage Data</strong></td>
+            <td>App open frequency, feature usage — aggregated and anonymous only</td>
+            <td>Automatically collected</td>
+            <td><span class="tag-teal">Yes</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="legal-warn">
+        <strong>What we do NOT collect:</strong> We do not collect payment information, government IDs, social security numbers, precise GPS location, call logs, contacts, or any data beyond what is listed above.
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="legal-section" id="s3">
+      <h2><span class="sec-num">03</span> How We Use Your Data</h2>
+      <p>All data we collect is used exclusively to provide and improve the FitClan service. Specifically:</p>
+      <ul>
+        <li><strong>Account data</strong> — to authenticate you, identify you within your family group, and personalize your experience</li>
+        <li><strong>Fitness data</strong> — to calculate your daily and weekly points, populate the leaderboard, and track streaks and milestones</li>
+        <li><strong>Family group data</strong> — to show the family leaderboard, weekly goals, and member rankings to all family members in your group</li>
+        <li><strong>Push tokens</strong> — to send you streak reminders, leaderboard change alerts, mission nudges, and weekly recap notifications (only if you grant notification permission)</li>
+        <li><strong>Device info</strong> — to diagnose crashes and ensure compatibility</li>
+        <li><strong>Anonymous usage data</strong> — to understand which features are used and improve the app</li>
+      </ul>
+      <p><strong>We do not use your data for advertising, profiling, or sale to third parties — ever.</strong></p>
+    </div>
+
+    <!-- 4 -->
+    <div class="legal-section" id="s4">
+      <h2><span class="sec-num">04</span> Health &amp; Fitness Data (Android Health Connect)</h2>
+      <p>FitClan requests access to Android Health Connect to read fitness data including steps, calories, distance, and active minutes. This is the core function of the app.</p>
+
+      <h3>What We Access</h3>
+      <ul>
+        <li>Steps (read only)</li>
+        <li>Calories burned (read only)</li>
+        <li>Distance (read only)</li>
+        <li>Active minutes / exercise sessions (read only)</li>
+      </ul>
+
+      <h3>How We Use It</h3>
+      <p>Health Connect data is read solely to calculate your FitClan point score and populate your personal dashboard and family leaderboard. We do not write data back to Health Connect.</p>
+
+      <div class="legal-highlight">
+        <strong>Health Connect Data Policy:</strong> Health Connect data is <strong>never</strong> used for advertising, never shared with third-party analytics platforms, never sold, and never used for any purpose outside of providing the FitClan leaderboard service. This data is stored securely in your FitClan account on Supabase servers and is deleted when you delete your account.
+      </div>
+
+      <h3>Revoking Access</h3>
+      <p>You can revoke FitClan's access to Health Connect at any time through Android Settings → Health Connect → App permissions → FitClan. Revoking access will prevent new fitness data from syncing but will not delete previously synced data from your FitClan account (you can do that via account deletion).</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="legal-section" id="s5">
+      <h2><span class="sec-num">05</span> Children's Privacy</h2>
+      <p>FitClan is designed for use by families, which may include children under the age of 13. We take children's privacy seriously.</p>
+
+      <h3>Account Creation</h3>
+      <p>FitClan requires users to be at least 13 years old to create their own account. Children under 13 may use FitClan only as part of a family group where a parent or legal guardian has created the family account and manages membership.</p>
+
+      <h3>Parental Consent</h3>
+      <p>By adding a child under 13 to a FitClan family group, the parent or guardian represents that they have consented to the collection and use of the child's fitness data as described in this policy, solely for the purpose of participating in the family leaderboard.</p>
+
+      <h3>Data Collected for Children</h3>
+      <p>For child members of a family group (under 13), we collect only:</p>
+      <ul>
+        <li>A display name (set by the parent — does not need to be the child's real name)</li>
+        <li>Fitness data from Health Connect (steps, calories, distance) on the child's device, if the parent installs and configures the app on that device</li>
+        <li>Points and leaderboard position within the family group</li>
+      </ul>
+      <p>We do not collect email addresses, phone numbers, or any other identifying information from child users.</p>
+
+      <h3>Parental Rights</h3>
+      <p>Parents and guardians may at any time: review their child's data, request deletion of their child's data, or remove their child from the family group. Contact us at <a href="mailto:privacy@fitclan.ca" style="color:var(--teal)">privacy@fitclan.ca</a> to exercise these rights.</p>
+
+      <div class="legal-highlight">
+        <strong>COPPA:</strong> If you are a parent in the United States and believe we have inadvertently collected personal information from your child under 13 without consent, please contact us immediately at <a href="mailto:privacy@fitclan.ca" style="color:var(--teal)">privacy@fitclan.ca</a> and we will promptly delete that data.
+      </div>
+    </div>
+
+    <!-- 6 -->
+    <div class="legal-section" id="s6">
+      <h2><span class="sec-num">06</span> Data Sharing &amp; Third Parties</h2>
+      <p>We do not sell, rent, or trade your personal data. We share data only with the following service providers, solely to operate FitFam:</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Purpose</th>
+            <th>Data Shared</th>
+            <th>Privacy Policy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Supabase</strong></td>
+            <td>Database, authentication, and backend hosting</td>
+            <td>Account data, fitness data, family group data</td>
+            <td><a href="https://supabase.com/privacy" target="_blank" rel="noopener" style="color:var(--teal)">supabase.com/privacy</a></td>
+          </tr>
+          <tr>
+            <td><strong>Firebase (Google)</strong></td>
+            <td>Push notification delivery (FCM)</td>
+            <td>FCM device token only</td>
+            <td><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener" style="color:var(--teal)">firebase.google.com/support/privacy</a></td>
+          </tr>
+          <tr>
+            <td><strong>Google Health Connect</strong></td>
+            <td>Fitness data source (on-device)</td>
+            <td>Data is read locally; we receive the result</td>
+            <td><a href="https://health.google/health-connect-privacy-policy/" target="_blank" rel="noopener" style="color:var(--teal)">health.google</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Legal Disclosure</h3>
+      <p>We may disclose your information if required to do so by law or in response to valid requests by public authorities (e.g., court order, government request). We will notify you of such disclosures where legally permitted.</p>
+
+      <h3>Business Transfers</h3>
+      <p>If FitClan is acquired, merged, or transfers its assets, your data may be transferred as part of that transaction. We will notify you via email and/or a prominent notice in the app before your data is transferred and becomes subject to a different privacy policy.</p>
+    </div>
+
+    <!-- 7 -->
+    <div class="legal-section" id="s7">
+      <h2><span class="sec-num">07</span> Data Retention</h2>
+      <p>We retain your data for as long as your FitFam account is active. Specifically:</p>
+      <ul>
+        <li><strong>Account data:</strong> Retained until you delete your account</li>
+        <li><strong>Fitness data:</strong> Retained for your activity history until account deletion</li>
+        <li><strong>Push tokens:</strong> Deleted when you revoke notification permissions or delete your account</li>
+        <li><strong>Anonymous usage data:</strong> May be retained indefinitely in aggregate/anonymized form</li>
+      </ul>
+
+      <h3>Account Deletion</h3>
+      <p>You can delete your FitClan account at any time from within the app (Settings → Account → Delete Account) or by emailing <a href="mailto:privacy@fitclan.ca" style="color:var(--teal)">privacy@fitclan.ca</a>. Upon deletion, all personal data including your account details, fitness history, and family group memberships will be permanently deleted within 30 days.</p>
+      <p>Note: if you are the owner of a family group, deleting your account will also delete the family group and remove all members. We recommend transferring ownership before deleting your account.</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="legal-section" id="s8">
+      <h2><span class="sec-num">08</span> Security</h2>
+      <p>We take reasonable technical and organizational measures to protect your data:</p>
+      <ul>
+        <li>All data is transmitted over encrypted HTTPS connections</li>
+        <li>Data is stored in Supabase with row-level security policies ensuring users can only access their own data and their family group's data</li>
+        <li>Authentication uses Supabase Auth with industry-standard JWT tokens</li>
+        <li>Health Connect data is accessed on-device and transmitted only over encrypted connections to our servers</li>
+        <li>We do not store passwords in plain text — authentication is managed by Supabase Auth</li>
+      </ul>
+      <p>No method of transmission over the internet or electronic storage is 100% secure. While we strive to protect your data, we cannot guarantee absolute security. If you discover a security vulnerability, please responsibly disclose it to <a href="mailto:security@fitclan.ca" style="color:var(--teal)">security@fitclan.ca</a>.</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="legal-section" id="s9">
+      <h2><span class="sec-num">09</span> Your Rights</h2>
+      <p>You have the following rights regarding your personal data:</p>
+      <ul>
+        <li><strong>Access:</strong> You can request a copy of all data we hold about you</li>
+        <li><strong>Correction:</strong> You can update your display name and profile information in the app at any time</li>
+        <li><strong>Deletion:</strong> You can delete your account and all associated data (see Section 7)</li>
+        <li><strong>Portability:</strong> You can request an export of your fitness history and account data in a machine-readable format</li>
+        <li><strong>Objection:</strong> You can opt out of push notifications at any time via your device's notification settings</li>
+        <li><strong>Health Connect:</strong> You can revoke Health Connect permissions at any time (see Section 4)</li>
+      </ul>
+      <p>To exercise any of these rights, contact us at <a href="mailto:privacy@fitclan.ca" style="color:var(--teal)">privacy@fitclan.ca</a>. We will respond within 30 days.</p>
+      <p>If you are in the European Economic Area (EEA) or United Kingdom, you also have rights under GDPR/UK GDPR, including the right to lodge a complaint with your local supervisory authority.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="legal-section" id="s10">
+      <h2><span class="sec-num">10</span> Cookies &amp; Website</h2>
+      <p>The FitClan website (fitclan.ca) is a static informational site. We use only:</p>
+      <ul>
+        <li><strong>Strictly necessary cookies:</strong> None — the website does not set any cookies</li>
+        <li><strong>Analytics:</strong> We do not use Google Analytics or any third-party analytics on the website</li>
+        <li><strong>Third-party fonts:</strong> We load fonts from Google Fonts. Google may log the request. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color:var(--teal)">Google's Privacy Policy</a></li>
+      </ul>
+      <p>The website does not track visitors, display ads, or use any marketing cookies.</p>
+    </div>
+
+    <!-- 11 -->
+    <div class="legal-section" id="s11">
+      <h2><span class="sec-num">11</span> Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we do:</p>
+      <ul>
+        <li>We will update the "Last updated" date at the top of this page</li>
+        <li>For material changes, we will notify you via a push notification and/or an in-app banner</li>
+        <li>For changes affecting children's data, we will require re-consent from parents/guardians</li>
+      </ul>
+      <p>Continued use of FitClan after the effective date of a revised policy constitutes acceptance of the changes.</p>
+    </div>
+
+    <!-- 12 -->
+    <div class="legal-section" id="s12">
+      <h2><span class="sec-num">12</span> Contact Us</h2>
+      <p>If you have any questions, concerns, or requests regarding this Privacy Policy or your data, please contact us:</p>
+      <div class="contact-card">
+        <p style="margin-bottom:10px"><strong>FitClan — Privacy Enquiries</strong></p>
+        <p style="margin-bottom:6px">📧 Email: <a href="mailto:privacy@fitclan.ca">privacy@fitclan.ca</a></p>
+        <p style="margin-bottom:6px">🌐 Website: <a href="https://fitclan.ca">fitclan.ca</a></p>
+        <p style="color:var(--text-faint);font-size:.82rem;margin-top:12px">We aim to respond to all privacy enquiries within 30 days.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-glow"></div>
+    <div class="container">
+      <div class="footer-bottom" style="padding-top:0;border-top:none">
+        <span>© 2026 FitClan. All rights reserved.</span>
+        <span>
+          <a href="privacy.html" style="color:var(--teal);margin-right:20px">Privacy Policy</a>
+          <a href="terms.html" style="color:var(--text-muted)">Terms of Service</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — FitClan</title>
+  <meta name="description" content="FitClan Terms of Service — the rules and agreements for using the FitClan app and website." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .legal-hero {
+      padding: 140px 0 60px;
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+    }
+    .legal-hero-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    .legal-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 14px;
+      background: hsl(45,100%,60%,0.1);
+      border: 1px solid hsl(45,100%,60%,0.25);
+      border-radius: 50px;
+      font-size: .75rem; font-weight: 600; color: var(--gold);
+      margin-bottom: 20px;
+    }
+    .legal-title {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin-bottom: 12px;
+    }
+    .legal-meta {
+      font-size: .85rem;
+      color: var(--text-muted);
+    }
+    .legal-meta strong { color: var(--gold); }
+
+    .legal-body {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 32px 120px;
+    }
+    .legal-toc {
+      background: hsl(240,3%,11%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 56px;
+    }
+    .legal-toc h3 {
+      font-family: var(--font-head);
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .legal-toc ol {
+      list-style: decimal;
+      padding-left: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 40px;
+    }
+    .legal-toc li { font-size: .875rem; }
+    .legal-toc a { color: var(--text-muted); transition: color .2s; }
+    .legal-toc a:hover { color: var(--gold); }
+
+    .legal-section {
+      margin-bottom: 52px;
+    }
+    .legal-section h2 {
+      font-family: var(--font-head);
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .legal-section h2 .sec-num {
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--gold);
+      background: hsl(45,100%,60%,0.1);
+      border: 1px solid hsl(45,100%,60%,0.25);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-family: var(--font-head);
+    }
+    .legal-section h3 {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 24px 0 10px;
+      color: var(--text);
+    }
+    .legal-section p {
+      font-size: .93rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+    .legal-section ul, .legal-section ol {
+      padding-left: 20px;
+      margin-bottom: 14px;
+    }
+    .legal-section li {
+      font-size: .93rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 6px;
+    }
+    .legal-section li::marker { color: var(--gold); }
+    .legal-highlight {
+      background: hsl(159,93%,50%,0.07);
+      border-left: 3px solid var(--teal);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 20px;
+      margin: 20px 0;
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .legal-highlight strong { color: var(--text); }
+    .legal-warn {
+      background: hsl(45,100%,60%,0.07);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 20px;
+      margin: 20px 0;
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .legal-danger {
+      background: hsl(0,100%,71%,0.07);
+      border-left: 3px solid var(--coral);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 20px;
+      margin: 20px 0;
+      font-size: .9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .contact-card {
+      background: linear-gradient(145deg, hsl(240,3%,13%), hsl(240,3%,9%));
+      border: 1px solid hsl(45,100%,60%,0.2);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-top: 20px;
+    }
+    .contact-card p { margin: 0; }
+    .contact-card a { color: var(--teal); }
+    .contact-card a:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .legal-toc ol { grid-template-columns: 1fr; }
+      .legal-body { padding: 40px 20px 80px; }
+      .legal-hero-inner { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav scrolled" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-icon">🏃</span>
+        <span class="logo-text">FitClan</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#features" class="nav-link">Features</a></li>
+        <li><a href="index.html#how" class="nav-link">How It Works</a></li>
+        <li><a href="index.html#download" class="nav-link">Download</a></li>
+      </ul>
+      <a href="index.html#download" class="nav-cta">
+        <span>Get the App</span>
+        <div class="btn-glow"></div>
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="legal-hero">
+    <div class="legal-hero-inner">
+      <div class="legal-badge">📋 Legal Document</div>
+      <h1 class="legal-title">Terms of Service</h1>
+      <p class="legal-meta">
+        <strong>Effective date: May 8, 2026</strong> &nbsp;·&nbsp;
+        Last updated: May 8, 2026 &nbsp;·&nbsp;
+        Applies to: FitClan Android App &amp; fitclan.ca website
+      </p>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="legal-body">
+
+    <div class="legal-highlight">
+      <strong>Plain-English Summary:</strong> FitClan is a free family fitness app. By using it you agree to use it responsibly, not to misuse the leaderboard or impersonate others, and to understand that fitness data is for fun — not medical advice. We can suspend accounts that violate these terms.
+    </div>
+
+    <!-- TABLE OF CONTENTS -->
+    <div class="legal-toc">
+      <h3>Table of Contents</h3>
+      <ol>
+        <li><a href="#t1">Acceptance of Terms</a></li>
+        <li><a href="#t2">Eligibility</a></li>
+        <li><a href="#t3">Description of Service</a></li>
+        <li><a href="#t4">Your Account</a></li>
+        <li><a href="#t5">Family Groups</a></li>
+        <li><a href="#t6">Acceptable Use</a></li>
+        <li><a href="#t7">Health &amp; Fitness Data</a></li>
+        <li><a href="#t8">No Medical Advice</a></li>
+        <li><a href="#t9">Intellectual Property</a></li>
+        <li><a href="#t10">Disclaimers</a></li>
+        <li><a href="#t11">Limitation of Liability</a></li>
+        <li><a href="#t12">Termination</a></li>
+        <li><a href="#t13">Changes to Service</a></li>
+        <li><a href="#t14">Governing Law</a></li>
+        <li><a href="#t15">Contact Us</a></li>
+      </ol>
+    </div>
+
+    <!-- 1 -->
+    <div class="legal-section" id="t1">
+      <h2><span class="sec-num">01</span> Acceptance of Terms</h2>
+      <p>These Terms of Service ("Terms") govern your access to and use of the FitClan mobile application ("App"), the FitClan website at fitclan.ca ("Website"), and any related services (collectively, the "Service"), operated by Nishant Mittal ("we", "us", "our").</p>
+      <p>By downloading, installing, or using the FitClan App, or by accessing the Website, you confirm that you have read, understood, and agree to be bound by these Terms and our <a href="privacy.html" style="color:var(--teal)">Privacy Policy</a>, which is incorporated herein by reference.</p>
+      <p>If you do not agree to these Terms, do not use FitClan.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="legal-section" id="t2">
+      <h2><span class="sec-num">02</span> Eligibility</h2>
+      <h3>General Users</h3>
+      <p>You must be at least 13 years old to create a FitFam account. By creating an account, you represent and warrant that you are 13 years of age or older.</p>
+
+      <h3>Users Under 13</h3>
+      <p>Children under 13 may participate in FitFam only as members of a family group where a parent or legal guardian has created the account and is responsible for managing the child's participation. The parent or guardian accepts these Terms on behalf of the child.</p>
+
+      <h3>Geographic Availability</h3>
+      <p>The Service is available globally wherever the Google Play Store and (in the future) Apple App Store are available. You are responsible for compliance with local laws in your jurisdiction.</p>
+    </div>
+
+    <!-- 3 -->
+    <div class="legal-section" id="t3">
+      <h2><span class="sec-num">03</span> Description of Service</h2>
+      <p>FitClan is a free family fitness gamification application that:</p>
+      <ul>
+        <li>Syncs with Android Health Connect to track steps, calories, distance, and active minutes</li>
+        <li>Awards points based on daily fitness activity</li>
+        <li>Maintains a real-time leaderboard within family groups</li>
+        <li>Enables daily missions, streak tracking, and weekly family goals</li>
+        <li>Sends optional push notifications to encourage activity</li>
+        <li>Provides a Conquest Mode game feature</li>
+      </ul>
+      <p>The Service is provided free of charge. We reserve the right to introduce optional premium features in the future, which will be clearly disclosed and will not remove or degrade existing free functionality without reasonable notice.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="legal-section" id="t4">
+      <h2><span class="sec-num">04</span> Your Account</h2>
+      <h3>Registration</h3>
+      <p>To use FitClan, you must register an account with a valid email address and a display name. You agree to provide accurate and current information and to update it as necessary.</p>
+
+      <h3>Account Security</h3>
+      <p>You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account. You agree to notify us immediately at <a href="mailto:support@fitclan.ca" style="color:var(--teal)">support@fitclan.ca</a> if you suspect any unauthorized access to your account.</p>
+
+      <h3>One Account Per Person</h3>
+      <p>Each person may maintain only one FitClan account. Creating multiple accounts to gain competitive advantages on the leaderboard is prohibited and may result in all associated accounts being suspended.</p>
+
+      <h3>Account Deletion</h3>
+      <p>You may delete your account at any time via Settings → Account → Delete Account in the App, or by contacting us. See our Privacy Policy for details on data deletion.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="legal-section" id="t5">
+      <h2><span class="sec-num">05</span> Family Groups</h2>
+      <h3>Creating a Group</h3>
+      <p>Any registered user may create a family group. The creator becomes the group owner and is responsible for managing membership.</p>
+
+      <h3>Joining a Group</h3>
+      <p>Users join groups via invite codes shared by the group owner. By joining a group, you consent to your display name, points, activity history, and leaderboard position being visible to all members of that group.</p>
+
+      <h3>Group Owner Responsibilities</h3>
+      <p>As a group owner, you are responsible for:</p>
+      <ul>
+        <li>Ensuring that any members under 13 are added with appropriate parental consent</li>
+        <li>Managing the group invite code and not sharing it publicly</li>
+        <li>Removing members who violate these Terms</li>
+      </ul>
+
+      <h3>Group Data Visibility</h3>
+      <p>Your leaderboard data (display name, points, rank) is visible to all members of your family group. This data is not publicly visible outside your group.</p>
+
+      <h3>Leaving a Group</h3>
+      <p>You may leave a family group at any time. Your historical points data will be removed from the group leaderboard upon leaving.</p>
+    </div>
+
+    <!-- 6 -->
+    <div class="legal-section" id="t6">
+      <h2><span class="sec-num">06</span> Acceptable Use</h2>
+      <p>You agree to use FitFam only for its intended purpose of family fitness tracking and friendly competition. You agree <strong>not</strong> to:</p>
+
+      <h3>Data Integrity</h3>
+      <ul>
+        <li>Manipulate, spoof, or falsify fitness data synced from Health Connect or any other source</li>
+        <li>Use automation, scripts, bots, or any means to artificially inflate your step count or points</li>
+        <li>Exploit bugs or glitches in the scoring system to gain unfair advantages</li>
+      </ul>
+
+      <h3>Account & Identity</h3>
+      <ul>
+        <li>Impersonate any person or entity, or misrepresent your affiliation with any person</li>
+        <li>Create accounts for the purpose of harassing other users</li>
+        <li>Share your account credentials with others</li>
+      </ul>
+
+      <h3>Content & Conduct</h3>
+      <ul>
+        <li>Upload or transmit any content that is unlawful, harassing, abusive, defamatory, or otherwise objectionable</li>
+        <li>Use the app in any way that could damage, disable, or impair the Service or servers</li>
+        <li>Attempt to gain unauthorized access to any part of the Service, other user accounts, or our systems</li>
+        <li>Reverse engineer, decompile, or disassemble the App</li>
+        <li>Use the Service for any commercial purpose without our written consent</li>
+      </ul>
+
+      <div class="legal-danger">
+        <strong>Cheating Policy:</strong> We reserve the right to investigate suspicious activity and permanently ban accounts found to be cheating, manipulating fitness data, or using automation to inflate points. Leaderboard integrity is core to the FitFam experience.
+      </div>
+    </div>
+
+    <!-- 7 -->
+    <div class="legal-section" id="t7">
+      <h2><span class="sec-num">07</span> Health &amp; Fitness Data</h2>
+      <p>FitClan reads fitness data from Android Health Connect solely to calculate points and display activity summaries. You grant FitClan permission to access this data when you authorize Health Connect access on your device.</p>
+      <p>You can revoke this permission at any time through your Android device settings. Revocation will stop new data from syncing but will not affect your account or previously recorded activity.</p>
+      <p>You represent that the health and fitness data synced to FitClan belongs to you or to a family member for whom you have obtained appropriate consent (including parental consent for children).</p>
+    </div>
+
+    <!-- 8 -->
+    <div class="legal-section" id="t8">
+      <h2><span class="sec-num">08</span> No Medical Advice</h2>
+      <div class="legal-danger">
+        <strong>Important:</strong> FitClan is an entertainment and motivation app. It is NOT a medical device, healthcare application, or fitness coaching service.
+      </div>
+      <p>The fitness data, points, goals, and statistics displayed in FitClan are provided for informational and entertainment purposes only. They do not constitute medical advice, diagnosis, or treatment recommendations.</p>
+      <p>Always consult a qualified healthcare professional before starting any new exercise program, particularly if you have a pre-existing medical condition, disability, or injury. Do not rely on FitClan data to make health or medical decisions.</p>
+      <p>FitClan assumes no liability for any injury, illness, or health outcome arising from physical activity undertaken in connection with using the app.</p>
+    </div>
+
+    <!-- 9 -->
+    <div class="legal-section" id="t9">
+      <h2><span class="sec-num">09</span> Intellectual Property</h2>
+      <h3>Our Property</h3>
+      <p>The FitClan App, Website, logo, branding, design, code, text, graphics, and all other content are the property of Nishant Mittal and are protected by applicable intellectual property laws. You may not copy, reproduce, distribute, modify, or create derivative works without our express written permission.</p>
+
+      <h3>Your Content</h3>
+      <p>You retain ownership of any content you create in FitFam (such as your display name or profile photo). By using the Service, you grant us a limited, non-exclusive license to use, store, and display your content solely to provide the Service to you and your family group members.</p>
+
+      <h3>Feedback</h3>
+      <p>If you submit feedback, ideas, or suggestions about FitFam, you grant us an unrestricted, perpetual, royalty-free license to use that feedback for any purpose, including improving the Service. You waive any claim to compensation for such feedback.</p>
+    </div>
+
+    <!-- 10 -->
+    <div class="legal-section" id="t10">
+      <h2><span class="sec-num">10</span> Disclaimers</h2>
+      <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:</p>
+      <ul>
+        <li>Implied warranties of merchantability, fitness for a particular purpose, or non-infringement</li>
+        <li>Warranties that the Service will be uninterrupted, error-free, or completely secure</li>
+        <li>Warranties regarding the accuracy or completeness of fitness data synced from Health Connect or any third-party source</li>
+        <li>Warranties that the Service will be available at all times or that data will never be lost</li>
+      </ul>
+      <p>Step counts, calorie estimates, and other fitness metrics are estimates provided by Health Connect and the underlying sensors in your device. FitFam is not responsible for inaccuracies in these measurements.</p>
+    </div>
+
+    <!-- 11 -->
+    <div class="legal-section" id="t11">
+      <h2><span class="sec-num">11</span> Limitation of Liability</h2>
+      <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, FITCLAN AND ITS DEVELOPER (NISHANT MITTAL) SHALL NOT BE LIABLE FOR:</p>
+      <ul>
+        <li>Any indirect, incidental, special, consequential, or punitive damages</li>
+        <li>Loss of data, revenue, profits, or goodwill</li>
+        <li>Personal injury or property damage arising from your use of the Service</li>
+        <li>Any bugs, errors, viruses, or other harmful components transmitted through the Service</li>
+        <li>Any damages resulting from reliance on fitness data provided by the Service</li>
+      </ul>
+      <p>Our total liability to you for any claims arising from your use of the Service shall not exceed USD $10.00 or the amount you have paid us in the past twelve months, whichever is greater.</p>
+      <p>Some jurisdictions do not allow the exclusion or limitation of certain types of liability. In such cases, the limitations above apply to the maximum extent permitted by law.</p>
+    </div>
+
+    <!-- 12 -->
+    <div class="legal-section" id="t12">
+      <h2><span class="sec-num">12</span> Termination</h2>
+      <h3>By You</h3>
+      <p>You may stop using FitClan and delete your account at any time. Deletion is permanent and cannot be reversed.</p>
+
+      <h3>By Us</h3>
+      <p>We reserve the right to suspend or terminate your account, without prior notice, if we determine that you have:</p>
+      <ul>
+        <li>Violated any provision of these Terms</li>
+        <li>Engaged in cheating, data manipulation, or abuse of the leaderboard system</li>
+        <li>Engaged in conduct that is harmful to other users or to the integrity of the Service</li>
+        <li>Provided false information during registration</li>
+      </ul>
+      <p>Upon termination, your right to use the Service immediately ceases. We may, but are not obligated to, provide prior notice before termination. You may appeal a suspension by contacting <a href="mailto:support@fitclan.ca" style="color:var(--teal)">support@fitclan.ca</a>.</p>
+
+      <h3>Effect of Termination</h3>
+      <p>Sections 8 (No Medical Advice), 9 (Intellectual Property), 10 (Disclaimers), 11 (Limitation of Liability), and 14 (Governing Law) survive termination of these Terms.</p>
+    </div>
+
+    <!-- 13 -->
+    <div class="legal-section" id="t13">
+      <h2><span class="sec-num">13</span> Changes to Service &amp; Terms</h2>
+      <h3>Changes to Terms</h3>
+      <p>We may update these Terms at any time. When we make material changes, we will:</p>
+      <ul>
+        <li>Update the "Effective date" at the top of this page</li>
+        <li>Notify you via in-app notification and/or email at least 14 days before the changes take effect (except where changes are required by law)</li>
+      </ul>
+      <p>Your continued use of FitClan after the effective date constitutes acceptance of the revised Terms. If you disagree with the changes, please delete your account before the effective date.</p>
+
+      <h3>Changes to Service</h3>
+      <p>We reserve the right to modify, add, or remove features of the Service at any time. We may introduce optional paid features in the future. We will not remove core free features without reasonable notice.</p>
+
+      <div class="legal-warn">
+        <strong>Future Monetization:</strong> FitClan is currently free. If we introduce in-app purchases or subscriptions in the future, all purchases will be clearly disclosed before payment is required, and core features will remain accessible for free users.
+      </div>
+    </div>
+
+    <!-- 14 -->
+    <div class="legal-section" id="t14">
+      <h2><span class="sec-num">14</span> Governing Law &amp; Disputes</h2>
+      <p>These Terms are governed by and construed in accordance with applicable law. Any disputes arising from or relating to these Terms or the Service shall first be attempted to be resolved informally by contacting us at <a href="mailto:support@fitclan.ca" style="color:var(--teal)">support@fitclan.ca</a>.</p>
+      <p>If informal resolution is unsuccessful, disputes shall be submitted to binding arbitration on an individual basis, rather than in court. You waive any right to participate in class action lawsuits against FitClan.</p>
+      <p>Notwithstanding the above, either party may seek injunctive or other equitable relief in a court of competent jurisdiction to prevent irreparable harm.</p>
+      <p>If any provision of these Terms is found to be unenforceable, the remaining provisions will continue in full force and effect.</p>
+    </div>
+
+    <!-- 15 -->
+    <div class="legal-section" id="t15">
+      <h2><span class="sec-num">15</span> Contact Us</h2>
+      <p>For questions about these Terms, support requests, account issues, or to report violations:</p>
+      <div class="contact-card">
+        <p style="margin-bottom:10px"><strong>FitClan Support</strong></p>
+        <p style="margin-bottom:6px">📧 General: <a href="mailto:support@fitclan.ca">support@fitclan.ca</a></p>
+        <p style="margin-bottom:6px">📧 Privacy: <a href="mailto:privacy@fitclan.ca">privacy@fitclan.ca</a></p>
+        <p style="margin-bottom:6px">📧 Legal: <a href="mailto:legal@fitclan.ca">legal@fitclan.ca</a></p>
+        <p style="margin-bottom:6px">🌐 Website: <a href="https://fitclan.ca">fitclan.ca</a></p>
+        <p style="color:var(--text-faint);font-size:.82rem;margin-top:12px">We aim to respond to all enquiries within 5 business days.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-glow"></div>
+    <div class="container">
+      <div class="footer-bottom" style="padding-top:0;border-top:none">
+        <span>© 2026 FitClan. All rights reserved.</span>
+        <span>
+          <a href="privacy.html" style="color:var(--teal);margin-right:20px">Privacy Policy</a>
+          <a href="terms.html" style="color:var(--teal)">Terms of Service</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
