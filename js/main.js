@@ -12,11 +12,10 @@
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   let lenis = null;
   try {
-    lenis = new Lenis({ lerp: 0.062, smoothWheel: true, syncTouch: true });
-    (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
-    lenis.on('scroll', ScrollTrigger.update);
+    lenis = new Lenis({ lerp: 0.062, smoothWheel: true });
     gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
+    lenis.on('scroll', ScrollTrigger.update);
   } catch(e) {
     lenis = { on: () => {}, scrollTo: t => t?.scrollIntoView({ behavior: 'smooth' }), raf: () => {} };
   }
