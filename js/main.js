@@ -864,11 +864,7 @@
     },
   });
 
-  // Features section — whole section parallax shift
-  gsap.to('.features-grid', {
-    scrollTrigger: { trigger: '.features', start: 'top bottom', end: 'bottom top', scrub: 1.5 },
-    y: -60,
-  });
+  // Features section parallax removed — was causing overflow:hidden to clip pointer events
 
   // How it works section — steps fly in with spring bounce
   ScrollTrigger.create({
@@ -980,10 +976,13 @@
     const sections = document.querySelectorAll('.features, .stats-section, .how, .testimonials, .notif-section, .download-cta');
     sections.forEach(section => {
       section.style.position = 'relative';
-      section.style.overflow = 'hidden';
+      // DO NOT set overflow:hidden on sections — it clips pointer events for transformed children
+      const sweepWrap = document.createElement('div');
+      sweepWrap.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:50;';
       const sweep = document.createElement('div');
       sweep.className = 'section-sweep';
-      section.appendChild(sweep);
+      sweepWrap.appendChild(sweep);
+      section.appendChild(sweepWrap);
 
       ScrollTrigger.create({
         trigger: section, start: 'top 70%', once: true,
