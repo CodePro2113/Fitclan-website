@@ -59,8 +59,16 @@
   const cursor   = document.getElementById('cursor');
   const follower = document.getElementById('cursor-follower');
   let mx = 0, my = 0, fx = 0, fy = 0;
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; gsap.set(cursor, { x: mx, y: my }); });
-  gsap.ticker.add(() => { fx += (mx - fx) * 0.12; fy += (my - fy) * 0.12; gsap.set(follower, { x: fx, y: fy }); });
+  // Use left/top (not GSAP transform) so the Netlify snippet's left/top positioning doesn't stack
+  // with a GSAP transform to produce double-offset (cursor at 2× mouse position)
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    if (cursor) { cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; }
+  });
+  gsap.ticker.add(() => {
+    fx += (mx - fx) * 0.12; fy += (my - fy) * 0.12;
+    if (follower) { follower.style.left = fx + 'px'; follower.style.top = fy + 'px'; }
+  });
   document.querySelectorAll('a, button, [data-card], [data-magnetic]').forEach(el => {
     el.addEventListener('mouseenter', () => { cursor?.classList.add('hover'); follower?.classList.add('hover'); });
     el.addEventListener('mouseleave', () => { cursor?.classList.remove('hover'); follower?.classList.remove('hover'); });
