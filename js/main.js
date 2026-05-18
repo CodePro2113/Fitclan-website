@@ -12,7 +12,7 @@
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   let lenis = null;
   try {
-    lenis = new Lenis({ lerp: 0.075, smoothWheel: true });
+    lenis = new Lenis({ lerp: 0.062, smoothWheel: true, syncTouch: true });
     (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t * 1000));
@@ -404,14 +404,12 @@
      GSAP SCROLL ANIMATIONS
   ============================================ */
 
-  // Section headers — warp-in
+  // Section headers — warp-in (title handled by word-split observer)
   gsap.utils.toArray('.section-header').forEach(header => {
-    const tag   = header.querySelector('.section-tag');
-    const title = header.querySelector('.section-title');
-    const sub   = header.querySelector('.section-sub');
-    if (tag)   gsap.fromTo(tag,   { opacity:0, scale:.7 }, { opacity:1, scale:1, duration:.6, ease:'back.out(2)', scrollTrigger:{ trigger:header, start:'top 80%', toggleActions:'play none none none' } });
-    if (title) gsap.fromTo(title, { opacity:0, y:50, clipPath:'inset(100% 0% 0% 0%)' }, { opacity:1, y:0, clipPath:'inset(0% 0% 0% 0%)', duration:1, delay:.1, ease:'power4.out', scrollTrigger:{ trigger:header, start:'top 80%', toggleActions:'play none none none' } });
-    if (sub)   gsap.fromTo(sub,   { opacity:0, y:20 }, { opacity:1, y:0, duration:.7, delay:.3, ease:'power3.out', scrollTrigger:{ trigger:header, start:'top 80%', toggleActions:'play none none none' } });
+    const tag = header.querySelector('.section-tag');
+    const sub = header.querySelector('.section-sub');
+    if (tag) gsap.fromTo(tag, { opacity:0, scale:.7 }, { opacity:1, scale:1, duration:.6, ease:'back.out(2)', scrollTrigger:{ trigger:header, start:'top 80%', toggleActions:'play none none none' } });
+    if (sub) gsap.fromTo(sub, { opacity:0, y:20, filter:'blur(4px)' }, { opacity:1, y:0, filter:'blur(0px)', duration:.8, delay:.35, ease:'power3.out', scrollTrigger:{ trigger:header, start:'top 80%', toggleActions:'play none none none' } });
   });
 
   // Features hero parallax
@@ -697,5 +695,353 @@
   Object.assign(overlay.style, { position:'fixed', inset:'0', background:' hsl(240,3%,7%)', zIndex:'9999', pointerEvents:'none' });
   document.body.appendChild(overlay);
   gsap.to(overlay, { opacity:0, duration:.7, delay:.1, ease:'power2.inOut', onComplete:()=>overlay.remove() });
+
+  /* ============================================
+     MARQUEE / INFINITE TICKER — trust bar
+  ============================================ */
+  (function setupMarquee() {
+    document.querySelectorAll('.marquee-track, .ticker-track').forEach(track => {
+      // Clone children to create seamless loop
+      const items = Array.from(track.children);
+      items.forEach(item => {
+        const clone = item.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        track.appendChild(clone);
+      });
+    });
+  })();
+
+  /* ============================================
+     WORD SPLIT REVEALS — section titles & hero
+  ============================================ */
+  function splitWords(selector, staggerDelay = 0.06) {
+    document.querySelectorAll(selector).forEach(el => {
+      if (el.dataset.split) return; // already processed
+      el.dataset.split = '1';
+      // Walk child nodes; preserve <br> and element nodes (gradient-text spans etc.)
+      const childNodes = Array.from(el.childNodes);
+      el.innerHTML = '';
+      let wordIndex = 0;
+
+      childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          // Split plain text into words
+          const parts = node.textContent.split(/(\s+)/);
+          parts.forEach(part => {
+            if (/^\s+$/.test(part)) {
+              el.appendChild(document.createTextNode(part));
+            } else if (part) {
+              const wrap = document.createElement('span');
+              wrap.className = 'split-word-wrap';
+              wrap.style.cssText = 'overflow:hidden; display:inline-block; vertical-align:bottom;';
+              const span = document.createElement('span');
+              span.className = 'split-word';
+              span.textContent = part;
+              span.style.transitionDelay = (wordIndex++ * staggerDelay) + 's';
+              wrap.appendChild(span);
+              el.appendChild(wrap);
+            }
+          });
+        } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+          el.appendChild(node.cloneNode());
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // Wrap the whole element (e.g. gradient-text span) as one word unit
+          const wrap = document.createElement('span');
+          wrap.className = 'split-word-wrap';
+          wrap.style.cssText = 'overflow:hidden; display:inline-block; vertical-align:bottom;';
+          const span = document.createElement('span');
+          span.className = 'split-word';
+          span.style.transitionDelay = (wordIndex++ * staggerDelay) + 's';
+          span.appendChild(node.cloneNode(true));
+          wrap.appendChild(span);
+          el.appendChild(wrap);
+        }
+      });
+    });
+  }
+
+  // Apply to section titles (not hero — hero has its own char animation)
+  splitWords('.section-title');
+
+  // Trigger word splits via IntersectionObserver
+  const wordObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.querySelectorAll('.split-word').forEach(w => w.classList.add('in'));
+      wordObs.unobserve(entry.target);
+    });
+  }, { threshold: 0.25, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.section-title').forEach(el => wordObs.observe(el));
+
+  /* ============================================
+     SECTION DIVIDERS — glow line reveal
+  ============================================ */
+  const dividerObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('in');
+      dividerObs.unobserve(entry.target);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.section-divider').forEach(el => dividerObs.observe(el));
+
+  /* ============================================
+     TESTIMONIAL CARDS — alternate directions
+  ============================================ */
+  (function setupTestiCards() {
+    const cards = document.querySelectorAll('.testi-card');
+    const dirs = ['data-testi-left', 'data-testi-up', 'data-testi-right', 'data-testi-up', 'data-testi-left', 'data-testi-right'];
+    cards.forEach((card, i) => {
+      card.setAttribute(dirs[i % dirs.length], '');
+    });
+
+    const testiObs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const siblings = entry.target.closest('.testi-grid')?.querySelectorAll('.testi-card') ?? [entry.target];
+        siblings.forEach((card, i) => {
+          setTimeout(() => card.classList.add('visible'), i * 120);
+          testiObs.unobserve(card);
+        });
+      });
+    }, { threshold: 0.1 });
+    cards.forEach(c => testiObs.observe(c));
+  })();
+
+  /* ============================================
+     FEATURE CARDS — skew-in stagger
+  ============================================ */
+  (function setupFeatureCards() {
+    const cards = document.querySelectorAll('.feature-card');
+    cards.forEach((card, i) => {
+      if (i % 3 === 0) card.setAttribute('data-card-left', '');
+      else if (i % 3 === 1) card.setAttribute('data-card-up', '');
+      else card.setAttribute('data-card-right', '');
+    });
+
+    const fObs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const grid = entry.target.closest('.features-grid');
+        if (!grid) return;
+        const allCards = grid.querySelectorAll('.feature-card');
+        allCards.forEach((c, i) => {
+          setTimeout(() => c.classList.add('visible'), i * 110);
+          fObs.unobserve(c);
+        });
+      });
+    }, { threshold: 0.08 });
+    cards.forEach(c => fObs.observe(c));
+  })();
+
+  /* ============================================
+     SKEW-CARD VARIANTS — observer
+  ============================================ */
+  const skewObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('visible');
+      skewObs.unobserve(entry.target);
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('[data-card-left],[data-card-right],[data-card-up]').forEach(el => skewObs.observe(el));
+
+  /* ============================================
+     GSAP PREMIUM SCROLL ANIMATIONS
+  ============================================ */
+
+  // Stats section — fly in from four corners
+  ScrollTrigger.create({
+    trigger: '.stats-section', start: 'top 70%', once: true,
+    onEnter: () => {
+      const blocks = gsap.utils.toArray('.stat-block');
+      const origins = [[-80,-30],[80,-30],[-80,30],[80,30]];
+      blocks.forEach((b, i) => {
+        const [ox, oy] = origins[i % origins.length];
+        gsap.fromTo(b,
+          { x: ox, y: oy, opacity: 0, scale: .6, rotation: i%2===0 ? -8 : 8 },
+          { x: 0, y: 0, opacity: 1, scale: 1, rotation: 0, duration: .9, delay: i * .1, ease: 'back.out(1.6)' });
+      });
+    },
+  });
+
+  // Features section — whole section parallax shift
+  gsap.to('.features-grid', {
+    scrollTrigger: { trigger: '.features', start: 'top bottom', end: 'bottom top', scrub: 1.5 },
+    y: -60,
+  });
+
+  // How it works section — steps fly in with spring bounce
+  ScrollTrigger.create({
+    trigger: '.how', start: 'top 70%', once: true,
+    onEnter: () => {
+      gsap.utils.toArray('.timeline-step').forEach((step, i) => {
+        gsap.fromTo(step,
+          { x: -60, opacity: 0, scale: .92 },
+          { x: 0, opacity: 1, scale: 1, duration: .85, delay: .15 + i * .18, ease: 'back.out(1.4)' });
+      });
+    },
+  });
+
+  // Testimonials section — featured card spotlight enter
+  ScrollTrigger.create({
+    trigger: '.testimonials', start: 'top 65%', once: true,
+    onEnter: () => {
+      const featured = document.querySelector('.testi-featured');
+      if (featured) {
+        gsap.fromTo(featured,
+          { scale: .88, opacity: 0, filter: 'blur(12px)' },
+          { scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1.1, ease: 'power4.out' });
+      }
+    },
+  });
+
+  // Notification section — staggered list items
+  gsap.utils.toArray('.notif-list li').forEach((li, i) => {
+    gsap.fromTo(li,
+      { opacity: 0, x: -30 },
+      { opacity: 1, x: 0, duration: .6, delay: i * .1, ease: 'power3.out',
+        scrollTrigger: { trigger: li, start: 'top 85%', toggleActions: 'play none none none' } });
+  });
+
+  // Download CTA — background glow expand
+  ScrollTrigger.create({
+    trigger: '.download-cta', start: 'top 80%', once: true,
+    onEnter: () => {
+      const bg = document.querySelector('.cta-bg');
+      if (bg) gsap.fromTo(bg, { scale: .3, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.4, ease: 'power4.out' });
+    },
+  });
+
+  // Section tags — pop in with bounce
+  gsap.utils.toArray('.section-tag').forEach(tag => {
+    gsap.fromTo(tag,
+      { scale: 0, opacity: 0, rotation: -10 },
+      { scale: 1, opacity: 1, rotation: 0, duration: .7, ease: 'back.out(2.5)',
+        scrollTrigger: { trigger: tag, start: 'top 85%', toggleActions: 'play none none none' } });
+  });
+
+  // Timeline — connector line draw with color shift
+  gsap.fromTo('.timeline-line',
+    { scaleY: 0, opacity: 0 },
+    { scaleY: 1, opacity: 1, duration: 2.5, ease: 'power2.inOut',
+      scrollTrigger: { trigger: '.timeline', start: 'top 65%', toggleActions: 'play none none none' } });
+
+  // Stats section background glow pulse on entry
+  ScrollTrigger.create({
+    trigger: '.stats-section', start: 'top 60%', once: true,
+    onEnter: () => {
+      const bg = document.querySelector('.stats-bg');
+      if (bg) gsap.fromTo(bg, { opacity: 0 }, { opacity: 1, duration: 1.2, ease: 'power2.out' });
+    },
+  });
+
+  // Horizontal parallax on section sub text
+  gsap.utils.toArray('.section-sub').forEach(sub => {
+    gsap.fromTo(sub,
+      { opacity: 0, y: 25, filter: 'blur(6px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: .8, ease: 'power3.out',
+        scrollTrigger: { trigger: sub, start: 'top 85%', toggleActions: 'play none none none' } });
+  });
+
+  // Feature card icon bounce on section enter
+  ScrollTrigger.create({
+    trigger: '.features-grid', start: 'top 70%', once: true,
+    onEnter: () => {
+      gsap.utils.toArray('.card-icon').forEach((icon, i) => {
+        gsap.fromTo(icon,
+          { scale: 0, rotation: -20 },
+          { scale: 1, rotation: 0, duration: .6, delay: .3 + i * .12, ease: 'back.out(2.5)' });
+      });
+    },
+  });
+
+  // Ambient orbs — deeper parallax layers with depth
+  gsap.to('.orb-1', {
+    scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 2 },
+    y: 200, x: 80, scale: 1.3,
+  });
+  gsap.to('.orb-2', {
+    scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 2.5 },
+    y: -150, x: -60, scale: 0.8,
+  });
+
+  // Showcase section — depth parallax on individual phones
+  gsap.to('.sc-phone-item:nth-child(1) .sc-device', {
+    scrollTrigger: { trigger: '.showcase', start: 'top bottom', end: 'bottom top', scrub: 1 },
+    y: 50, rotationZ: -2,
+  });
+  gsap.to('.sc-phone-item:nth-child(3) .sc-device', {
+    scrollTrigger: { trigger: '.showcase', start: 'top bottom', end: 'bottom top', scrub: 1 },
+    y: 50, rotationZ: 2,
+  });
+
+  // Section entry teal sweep flash
+  (function sectionSweeps() {
+    const sections = document.querySelectorAll('.features, .stats-section, .how, .testimonials, .notif-section, .download-cta');
+    sections.forEach(section => {
+      section.style.position = 'relative';
+      section.style.overflow = 'hidden';
+      const sweep = document.createElement('div');
+      sweep.className = 'section-sweep';
+      section.appendChild(sweep);
+
+      ScrollTrigger.create({
+        trigger: section, start: 'top 70%', once: true,
+        onEnter: () => {
+          setTimeout(() => sweep.classList.add('fire'), 50);
+          setTimeout(() => sweep.classList.remove('fire'), 900);
+        },
+      });
+    });
+  })();
+
+  /* ============================================
+     SPOTLIGHT PARALLAX on mouse
+  ============================================ */
+  (function spotlightSetup() {
+    const spotSections = document.querySelectorAll('.features, .testimonials');
+    spotSections.forEach(section => {
+      if (window.matchMedia('(hover: none)').matches) return;
+      const spot = document.createElement('div');
+      spot.className = 'spotlight';
+      Object.assign(spot.style, { position: 'absolute', pointerEvents: 'none', opacity: '0', transition: 'opacity .5s', zIndex: '0' });
+      section.style.position = 'relative';
+      section.appendChild(spot);
+
+      section.addEventListener('mousemove', e => {
+        const rect = section.getBoundingClientRect();
+        spot.style.opacity = '1';
+        spot.style.left = (e.clientX - rect.left - 300) + 'px';
+        spot.style.top  = (e.clientY - rect.top  - 300) + 'px';
+      });
+      section.addEventListener('mouseleave', () => { spot.style.opacity = '0'; });
+    });
+  })();
+
+  /* ============================================
+     NAV LINKS — stagger reveal on load
+  ============================================ */
+  gsap.fromTo('.nav-link',
+    { opacity: 0, y: -10 },
+    { opacity: 1, y: 0, stagger: .07, duration: .5, ease: 'power3.out', delay: .3 });
+  gsap.fromTo('.nav-cta',
+    { opacity: 0, scale: .85 },
+    { opacity: 1, scale: 1, duration: .6, ease: 'back.out(2)', delay: .55 });
+
+  /* ============================================
+     FOOTER — reveal rows
+  ============================================ */
+  ScrollTrigger.create({
+    trigger: '.footer', start: 'top 85%', once: true,
+    onEnter: () => {
+      gsap.fromTo('.footer-top > *',
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, stagger: .12, duration: .7, ease: 'power3.out' });
+      gsap.fromTo('.social-btn',
+        { scale: 0, opacity: 0 },
+        { scale: 1, opacity: 1, stagger: .07, duration: .5, delay: .3, ease: 'back.out(2)' });
+    },
+  });
 
 })();

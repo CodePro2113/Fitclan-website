@@ -39,7 +39,7 @@
   <nav class="nav" id="nav">
     <div class="nav-inner">
       <a href="#" class="nav-logo">
-        <span class="logo-icon">🏃</span>
+        <span class="logo-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="display:block"><defs><linearGradient id="flameG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="hsl(159,93%,50%)"/><stop offset="100%" stop-color="hsl(217,91%,60%)"/></linearGradient></defs><path d="M12 2C12 2 7 7 7 12.5a5 5 0 0010 0C17 7 12 2 12 2z" fill="url(#flameG)" opacity=".9"/><path d="M12 8c0 0-2.5 3-2.5 4.5a2.5 2.5 0 005 0C14.5 11 12 8 12 8z" fill="white" opacity=".7"/></svg></span>
         <span class="logo-text">FitClan</span>
       </a>
       <ul class="nav-links">
@@ -200,30 +200,23 @@
     </div>
   </section>
 
-  <!-- ====== TRUST BAR ====== -->
-  <section class="trust-bar">
-    <div class="trust-inner">
-      <span class="trust-label">Built with</span>
-      <div class="trust-logos">
-        <div class="trust-logo">
-          <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#4285F4"/><text x="24" y="32" text-anchor="middle" fill="white" font-size="16" font-weight="bold">G</text></svg>
-          <span>Health Connect</span>
-        </div>
-        <div class="trust-logo">
-          <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#1A1A2E"/><text x="24" y="32" text-anchor="middle" fill="#00BCD4" font-size="11" font-weight="bold">SB</text></svg>
-          <span>Supabase</span>
-        </div>
-        <div class="trust-logo">
-          <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#FF6B35"/><text x="24" y="32" text-anchor="middle" fill="white" font-size="14" font-weight="bold">FC</text></svg>
-          <span>Firebase</span>
-        </div>
-        <div class="trust-logo">
-          <svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="10" fill="#3DDC84"/><text x="24" y="32" text-anchor="middle" fill="white" font-size="10" font-weight="bold">AND</text></svg>
-          <span>Android</span>
-        </div>
+  <!-- ====== TICKER STRIP ====== -->
+  <div class="ticker-strip">
+    <div class="marquee-outer">
+      <div class="ticker-track">
+        <div class="ticker-item"><span class="ticker-dot"></span>Health Connect Integration</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Real-Time Leaderboards</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Family Goal Tracking</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Daily Missions &amp; Rewards</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Android Native App</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Supabase Powered</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Steps · Calories · Sleep · Water</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Territory Conquest Mode</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Push Notifications</div>
+        <div class="ticker-item"><span class="ticker-dot"></span>Weekly Family Reports</div>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- ====== FEATURES ====== -->
   <section class="features" id="features">
@@ -319,25 +312,27 @@
     </div>
   </section>
 
+  <div class="section-divider" style="margin: 0;"></div>
+
   <!-- ====== STATS ====== -->
   <section class="stats-section">
     <div class="stats-bg"></div>
     <div class="container">
       <div class="stats-grid">
         <div class="stat-block" data-reveal>
-          <span class="big-num" data-count="12400">0</span>
+          <span class="big-num animated-gradient" data-count="12400">0</span>
           <span class="big-label">Families Competing</span>
         </div>
         <div class="stat-block" data-reveal>
-          <span class="big-num" data-count="284">0</span><span class="big-suffix">M</span>
+          <span class="big-num animated-gradient" data-count="284">0</span><span class="big-suffix">M</span>
           <span class="big-label">Steps Logged Globally</span>
         </div>
         <div class="stat-block" data-reveal>
-          <span class="big-num" data-count="4">0</span><span class="big-suffix">x</span>
+          <span class="big-num animated-gradient" data-count="4">0</span><span class="big-suffix">x</span>
           <span class="big-label">More Active Than Solo Apps</span>
         </div>
         <div class="stat-block" data-reveal>
-          <span class="big-num" data-count="98">0</span><span class="big-suffix">%</span>
+          <span class="big-num animated-gradient" data-count="98">0</span><span class="big-suffix">%</span>
           <span class="big-label">Would Recommend to Family</span>
         </div>
       </div>
@@ -603,6 +598,8 @@
     </div>
   </section>
 
+  <div class="section-divider" style="margin: 0;"></div>
+
   <!-- ====== HOW IT WORKS ====== -->
   <section class="how" id="how">
     <div class="container">
@@ -706,6 +703,8 @@
     </div>
   </section>
 
+  <div class="section-divider" style="margin: 0;"></div>
+
   <!-- ====== TESTIMONIALS ====== -->
   <section class="testimonials" id="testimonials">
     <div class="container">
@@ -793,7 +792,7 @@
       <div class="footer-top">
         <div class="footer-brand">
           <div class="footer-logo">
-            <span class="logo-icon">🏃</span>
+            <span class="logo-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" style="display:block"><defs><linearGradient id="flameG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="hsl(159,93%,50%)"/><stop offset="100%" stop-color="hsl(217,91%,60%)"/></linearGradient></defs><path d="M12 2C12 2 7 7 7 12.5a5 5 0 0010 0C17 7 12 2 12 2z" fill="url(#flameG)" opacity=".9"/><path d="M12 8c0 0-2.5 3-2.5 4.5a2.5 2.5 0 005 0C14.5 11 12 8 12 8z" fill="white" opacity=".7"/></svg></span>
             <span class="logo-text">FitClan</span>
           </div>
           <p class="footer-tagline">Making families move, one step at a time.</p>

@@ -307,7 +307,7 @@ ul { list-style: none; }
    ============================================ */
 .section-header { text-align: center; margin-bottom: 64px; }
 .section-tag { display: inline-block; padding: 4px 14px; background: hsl(159,93%,50%,0.1); border: 1px solid hsl(159,93%,50%,0.25); border-radius: 50px; font-size: .75rem; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; }
-.section-title { font-family: var(--font-head); font-size: clamp(2rem,3.5vw,3rem); font-weight: 700; line-height: 1.1; letter-spacing: -.02em; margin-bottom: 16px; }
+.section-title { font-family: var(--font-head); font-size: clamp(2rem,3.5vw,3rem); font-weight: 700; line-height: 1.2; letter-spacing: -.02em; margin-bottom: 16px; overflow: visible; }
 .section-sub { font-size: 1rem; color: var(--text-muted); max-width: 500px; margin: 0 auto; line-height: 1.7; }
 
 /* ============================================
@@ -939,6 +939,145 @@ ul { list-style: none; }
 @keyframes countFlash {
   0%   { color: var(--teal); text-shadow: 0 0 20px var(--teal); }
   100% { color: inherit; text-shadow: none; }
+}
+
+/* ============================================
+   PREMIUM ANIMATION LAYER — $30K FEEL
+   ============================================ */
+
+/* Subtle film-grain noise overlay — makes everything feel tactile */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.028;
+  pointer-events: none;
+  z-index: 9995;
+  mix-blend-mode: overlay;
+}
+
+/* ---- Marquee / infinite ticker ---- */
+.marquee-outer { overflow: hidden; mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent); }
+.marquee-track { display: flex; gap: 0; width: max-content; animation: marqueeRoll 28s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+.marquee-item { flex: 0 0 auto; }
+@keyframes marqueeRoll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ---- Word-split reveal ---- */
+.split-word-wrap { overflow: hidden; display: inline-block; }
+.split-word {
+  display: inline-block;
+  transform: translateY(110%) rotate(4deg);
+  opacity: 0;
+  transition: transform 0.75s cubic-bezier(.23,1,.32,1), opacity 0.55s ease;
+}
+.split-word.in { transform: translateY(0) rotate(0deg); opacity: 1; }
+
+/* ---- Enhanced data-reveal with blur ---- */
+[data-reveal], [data-reveal-right] {
+  filter: blur(4px);
+}
+[data-reveal].visible, [data-reveal-right].visible {
+  filter: blur(0px);
+  transition: opacity .9s cubic-bezier(.23,1,.32,1), transform .9s cubic-bezier(.23,1,.32,1), filter .9s ease;
+}
+
+/* ---- Skew-in card variants ---- */
+[data-card-left]  { opacity: 0; transform: translateX(-40px) skewX(4deg); transition: opacity .7s cubic-bezier(.23,1,.32,1), transform .7s cubic-bezier(.23,1,.32,1); }
+[data-card-right] { opacity: 0; transform: translateX(40px) skewX(-4deg); transition: opacity .7s cubic-bezier(.23,1,.32,1), transform .7s cubic-bezier(.23,1,.32,1); }
+[data-card-left].visible  { opacity: 1; transform: translateX(0) skewX(0); }
+[data-card-right].visible { opacity: 1; transform: translateX(0) skewX(0); }
+[data-card-up]  { opacity: 0; transform: translateY(60px) scale(0.94); transition: opacity .75s cubic-bezier(.23,1,.32,1), transform .75s cubic-bezier(.23,1,.32,1); }
+[data-card-up].visible { opacity: 1; transform: translateY(0) scale(1); }
+
+/* ---- Section glow divider line ---- */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, hsl(159,93%,50%,0) 20%, hsl(159,93%,50%,0.5) 50%, hsl(159,93%,50%,0) 80%, transparent 100%);
+  position: relative;
+  overflow: hidden;
+  transform: scaleX(0);
+  transition: transform 1.2s cubic-bezier(.23,1,.32,1);
+}
+.section-divider.in { transform: scaleX(1); }
+.section-divider::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+  width: 30%;
+  animation: dividerSweep 2.5s ease-in-out infinite 1.2s;
+}
+@keyframes dividerSweep { 0% { left: -30%; } 100% { left: 130%; } }
+
+/* ---- Horizontal ticker strip ---- */
+.ticker-strip {
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: hsl(240,3%,9%);
+  overflow: hidden;
+  position: relative; z-index: 10;
+}
+.ticker-track { display: flex; gap: 0; width: max-content; animation: marqueeRoll 22s linear infinite; }
+.ticker-item {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 40px;
+  font-size: .8rem; font-weight: 600; color: var(--text-muted);
+  white-space: nowrap;
+}
+.ticker-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 6px var(--teal); flex: 0 0 auto; }
+
+/* ---- Parallax section layers ---- */
+.parallax-slow   { will-change: transform; }
+.parallax-medium { will-change: transform; }
+
+/* ---- Animated gradient text on big numbers ---- */
+.animated-gradient {
+  background: linear-gradient(90deg, var(--teal), hsl(170,90%,60%), var(--blue), var(--teal));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 4s ease-in-out infinite;
+}
+@keyframes gradientShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+/* ---- Section sweep-in overlay (teal flash) ---- */
+.section-sweep {
+  position: absolute; inset: 0; pointer-events: none; z-index: 50;
+  background: linear-gradient(90deg, transparent, hsl(159,93%,50%,0.06), transparent);
+  transform: translateX(-100%);
+}
+.section-sweep.fire { animation: sectionSweep .8s ease-in-out forwards; }
+@keyframes sectionSweep { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
+
+/* ---- Feature card enhanced glow on hover ---- */
+.feature-card:hover {
+  border-color: hsl(159,93%,50%,0.35);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.5),
+    0 0 0 1px hsl(159,93%,50%,0.12),
+    0 0 40px hsl(159,93%,50%,0.08),
+    inset 0 1px 0 hsl(159,93%,50%,0.1);
+  transform: translateY(-4px) !important;
+}
+
+/* ---- Testi card stagger variants ---- */
+[data-testi-left]  { opacity: 0; transform: translateX(-50px) rotate(-2deg); transition: opacity .8s cubic-bezier(.23,1,.32,1), transform .8s cubic-bezier(.23,1,.32,1); }
+[data-testi-right] { opacity: 0; transform: translateX(50px) rotate(2deg);  transition: opacity .8s cubic-bezier(.23,1,.32,1), transform .8s cubic-bezier(.23,1,.32,1); }
+[data-testi-up]    { opacity: 0; transform: translateY(50px) scale(.92);     transition: opacity .8s cubic-bezier(.23,1,.32,1), transform .8s cubic-bezier(.23,1,.32,1); }
+[data-testi-left].visible, [data-testi-right].visible, [data-testi-up].visible { opacity: 1; transform: none; }
+
+/* ---- Spotlight effect behind sections ---- */
+.spotlight {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(159,93%,50%,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  transition: opacity .5s;
 }
 
 /* ============================================
