@@ -10,12 +10,20 @@
      SMOOTH SCROLL — LENIS
   ============================================ */
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+  // Respect OS-level reduced-motion preference
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   let lenis = null;
   try {
-    lenis = new Lenis({ lerp: 0.062, smoothWheel: true });
+    lenis = new Lenis({
+      lerp: prefersReducedMotion ? 1 : 0.1,
+      smoothWheel: !prefersReducedMotion,
+    });
     gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
     lenis.on('scroll', ScrollTrigger.update);
+    if (prefersReducedMotion) gsap.globalTimeline.timeScale(100);
   } catch(e) {
     lenis = { on: () => {}, scrollTo: t => t?.scrollIntoView({ behavior: 'smooth' }), raf: () => {} };
   }
@@ -75,73 +83,6 @@
   });
 
   /* ============================================
-     THREE.JS PARTICLE FIELD — teal/coral/gold
-  ============================================ */
-  (function initParticles() {
-    const canvas = document.getElementById('heroCanvas');
-    if (!canvas || typeof THREE === 'undefined') return;
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, canvas.offsetWidth / canvas.offsetHeight, 0.1, 1000);
-    camera.position.z = 80;
-
-    const count = 2000;
-    const positions = new Float32Array(count * 3);
-    const colors    = new Float32Array(count * 3);
-    const sizes     = new Float32Array(count);
-
-    // App palette particles
-    const palette = [
-      new THREE.Color().setHSL(159/360, 0.93, 0.50), // teal
-      new THREE.Color().setHSL(159/360, 0.93, 0.65), // teal light
-      new THREE.Color().setHSL(170/360, 0.90, 0.45), // teal dark
-      new THREE.Color().setHSL(0/360,   1.00, 0.71), // coral
-      new THREE.Color().setHSL(45/360,  1.00, 0.60), // gold
-      new THREE.Color().setHSL(217/360, 0.91, 0.60), // blue
-    ];
-    for (let i = 0; i < count; i++) {
-      const r = 55 + Math.random() * 90;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
-      positions[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
-      positions[i*3+2] = (Math.random() - .5) * 90;
-      const c = palette[Math.floor(Math.random() * palette.length)];
-      colors[i*3] = c.r; colors[i*3+1] = c.g; colors[i*3+2] = c.b;
-      sizes[i] = Math.random() * 2.8 + 0.3;
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
-    geo.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
-    const mat = new THREE.PointsMaterial({ size: 1.4, vertexColors: true, transparent: true, opacity: .7, sizeAttenuation: true, depthWrite: false });
-    const points = new THREE.Points(geo, mat);
-    scene.add(points);
-
-    let mouseX = 0, mouseY = 0, scrollY = 0;
-    document.addEventListener('mousemove', e => { mouseX = (e.clientX / window.innerWidth - .5) * 2; mouseY = (e.clientY / window.innerHeight - .5) * 2; });
-    if (lenis?.on) lenis.on('scroll', ({ scroll }) => { scrollY = scroll; });
-    window.addEventListener('scroll', () => { scrollY = window.scrollY; });
-
-    (function animate(t) {
-      requestAnimationFrame(animate);
-      const time = t * .001;
-      points.rotation.y = time * .035 + mouseX * .07;
-      points.rotation.x = time * .018 - mouseY * .04;
-      points.position.y = -scrollY * .025;
-      mat.opacity = Math.max(0, .7 - scrollY * .0008);
-      renderer.render(scene, camera);
-    })(0);
-
-    window.addEventListener('resize', () => {
-      const w = canvas.offsetWidth, h = canvas.offsetHeight;
-      renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
-    });
-  })();
-
-  /* ============================================
      MAGNETIC BUTTONS
   ============================================ */
   document.querySelectorAll('[data-magnetic]').forEach(el => {
@@ -173,7 +114,7 @@
       const y = (e.clientY - rect.top)  / rect.height;
       card.style.setProperty('--mx', (x*100)+'%');
       card.style.setProperty('--my', (y*100)+'%');
-      gsap.to(card, { rotationX: (y-.5)*-14, rotationY: (x-.5)*14, transformPerspective: 900, duration: .35, ease: 'power2.out' });
+      gsap.to(card, { rotationX: (y-.5)*-6, rotationY: (x-.5)*6, transformPerspective: 900, duration: .35, ease: 'power2.out' });
     });
     card.addEventListener('mouseleave', () => gsap.to(card, { rotationX: 0, rotationY: 0, duration: .7, ease: 'elastic.out(1,0.4)' }));
   });
@@ -240,15 +181,6 @@
   function initHeroAnim() {
     const tl = gsap.timeline({ delay: .15 });
 
-    // Page-load warp flash
-    const flash = document.createElement('div');
-    Object.assign(flash.style, {
-      position: 'fixed', inset: '0', zIndex: '9997', pointerEvents: 'none',
-      background: 'linear-gradient(135deg, hsl(159,93%,50%,0.15), transparent)',
-    });
-    document.body.appendChild(flash);
-    gsap.to(flash, { opacity: 0, duration: .5, onComplete: () => flash.remove() });
-
     // Badge pop
     tl.fromTo('.hero-badge',
       { opacity: 0, scale: .7, y: -10 },
@@ -262,36 +194,32 @@
       const wrapper = document.createElement('span');
       wrapper.style.cssText = 'display:block';
 
-      text.split('').forEach((char, j) => {
+      const words = text.split(' ');
+      words.forEach((word, j) => {
         const span = document.createElement('span');
-        span.style.cssText = 'display:inline-block; opacity:0; transform:translateY(50px) rotate(8deg) scale(0.7)';
+        span.style.cssText = 'display:inline-block; opacity:0';
         if (isGradient) span.style.cssText += '; background:inherit; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;';
-        span.textContent = char === ' ' ? ' ' : char;
+        span.textContent = j < words.length - 1 ? word + ' ' : word;
         wrapper.appendChild(span);
 
-        tl.to(span,
-          { opacity: 1, y: 0, rotate: 0, scale: 1, duration: .35, ease: 'back.out(2)' },
-          0.25 + lineIdx * 0.18 + j * 0.022);
-
-        // Random glitch flash on some chars
-        if (Math.random() > .7) {
-          tl.to(span,
-            { color: 'hsl(159,93%,50%)', duration: .08, yoyo: true, repeat: 1, ease: 'none' },
-            0.25 + lineIdx * 0.18 + j * 0.022 + .35);
-        }
+        tl.fromTo(span,
+          { opacity: 0, y: 38 },
+          { opacity: 1, y: 0, duration: .55, ease: 'power3.out' },
+          0.2 + lineIdx * 0.2 + j * 0.09);
       });
       line.appendChild(wrapper);
 
-      // Teal sweep line after each word
+      // Subtle teal sweep after line enters
       const sweep = document.createElement('div');
       Object.assign(sweep.style, {
         position: 'absolute', top: '0', left: '-10%', width: '30%', height: '100%',
-        background: 'linear-gradient(90deg, transparent, hsl(159,93%,50%,0.15), transparent)',
+        background: 'linear-gradient(90deg, transparent, hsl(159,93%,50%,0.12), transparent)',
         pointerEvents: 'none', zIndex: '5',
       });
       line.style.position = 'relative';
       line.appendChild(sweep);
-      tl.fromTo(sweep, { x: '-30%' }, { x: '140%', duration: .5, ease: 'power2.inOut' }, 0.25 + lineIdx * 0.18 + text.length * 0.022);
+      tl.fromTo(sweep, { x: '-30%' }, { x: '140%', duration: .6, ease: 'power2.inOut' },
+        0.2 + lineIdx * 0.2 + (words.length - 1) * 0.09 + 0.3);
     });
 
     // Sub + actions + stats
