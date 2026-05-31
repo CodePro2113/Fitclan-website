@@ -47,10 +47,13 @@
         <li><a href="#how" class="nav-link" data-magnetic>How It Works</a></li>
         <li><a href="#testimonials" class="nav-link" data-magnetic>Stories</a></li>
       </ul>
-      <a href="#download" class="nav-cta btn-magnetic" data-magnetic>
-        <span>Get the App</span>
-        <div class="btn-glow"></div>
-      </a>
+      <div class="nav-actions">
+        <a href="https://app.fitclan.ca/login" data-app-path="/login" class="nav-login" data-magnetic>Log in</a>
+        <a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="nav-cta btn-magnetic" data-magnetic>
+          <span>Sign up free</span>
+          <div class="btn-glow"></div>
+        </a>
+      </div>
       <button class="nav-burger" id="navBurger" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -63,7 +66,8 @@
       <li><a href="#features" class="mobile-link">Features</a></li>
       <li><a href="#how" class="mobile-link">How It Works</a></li>
       <li><a href="#testimonials" class="mobile-link">Stories</a></li>
-      <li><a href="#download" class="mobile-link cta-link">Get the App →</a></li>
+      <li><a href="https://app.fitclan.ca/login" data-app-path="/login" class="mobile-link">Log in</a></li>
+      <li><a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="mobile-link cta-link">Sign up free →</a></li>
     </ul>
   </div>
 
@@ -88,14 +92,14 @@
       </p>
 
       <div class="hero-actions" data-reveal>
-        <a href="#download" class="btn-primary btn-magnetic">
-          <span class="btn-text">Download Free</span>
-          <span class="btn-icon">↓</span>
+        <a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="btn-primary btn-magnetic">
+          <span class="btn-text">Sign up free</span>
+          <span class="btn-icon">→</span>
           <div class="btn-glow"></div>
         </a>
-        <a href="#features" class="btn-ghost btn-magnetic">
-          <span>See how it works</span>
-          <span class="btn-arrow">→</span>
+        <a href="#download" class="btn-ghost btn-magnetic">
+          <span>Get the app</span>
+          <span class="btn-arrow">↓</span>
         </a>
       </div>
 
@@ -761,9 +765,14 @@
       <div class="cta-content" data-reveal>
         <div class="cta-badge">Free · No Subscription · No Ads</div>
         <h2 class="cta-title">Your clan's<br/>best year starts<br/><span class="gradient-text">today.</span></h2>
-        <p class="cta-sub">Download FitClan free on Android. Set up your clan in 3 minutes. First step logged before breakfast.</p>
+        <p class="cta-sub">Set up your clan in 3 minutes — sign up free on the web, or grab the Android app. First step logged before breakfast.</p>
         <div class="cta-actions">
-          <a href="#" class="btn-primary btn-xl btn-magnetic" onclick="return false;">
+          <a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="btn-primary btn-xl btn-magnetic">
+            <span class="btn-text">Sign up free</span>
+            <span class="btn-icon">→</span>
+            <div class="btn-glow"></div>
+          </a>
+          <a href="#" class="btn-store btn-magnetic" onclick="return false;">
             <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.37.6 1.23 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg>
             <div>
               <div class="btn-small-text">Get it on</div>
@@ -822,6 +831,18 @@
       </div>
     </div>
   </footer>
+
+  <!-- ── FitClan web app URL ──────────────────────────────────────────────
+       Change this ONE line if the app is hosted on a different domain.
+       Every "Log in" / "Sign up" link on the site is rewritten from it. -->
+  <script>
+    window.FITCLAN_APP_URL = "https://app.fitclan.ca";
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll("[data-app-path]").forEach(function (el) {
+        el.setAttribute("href", window.FITCLAN_APP_URL + el.getAttribute("data-app-path"));
+      });
+    });
+  </script>
 
   <script src="js/main.js"></script>
   <script>document.addEventListener("DOMContentLoaded",function(){if(typeof lucide!=="undefined")lucide.createIcons();});</script>

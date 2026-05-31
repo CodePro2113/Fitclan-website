@@ -232,38 +232,57 @@
 
     <h1>Delete your FitClan<br/>account &amp; data</h1>
     <p class="subtitle">
-      You have the right to delete your account at any time. This page explains how — both from inside the app and via email.
+      You have the right to delete your account at any time. You can do it yourself in seconds — in the app or on the web — or email us and we'll handle it. Either way, deletion is immediate and permanent.
     </p>
 
-    <!-- Steps -->
-    <p class="steps-heading">How to delete your account</p>
+    <!-- Method 1: in the app -->
+    <p class="steps-heading">Option 1 — In the FitClan app</p>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <h3>Open the FitClan app</h3>
-          <p>Make sure you're signed in to the account you want to delete.</p>
+          <h3>Open the app &amp; go to Profile</h3>
+          <p>Make sure you're signed in to the account you want to delete, then open the <code>Profile</code> tab.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <h3>Go to your Profile</h3>
-          <p>Tap the <code>Profile</code> tab in the bottom navigation bar.</p>
+          <h3>Scroll down &amp; tap "Delete Account"</h3>
+          <p>You'll find it below the Sign Out button. Tap it to open the confirmation dialog.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
-          <h3>Scroll to the bottom &amp; tap "Delete Account"</h3>
-          <p>You'll find it below the Sign Out button. Tap it to open the confirmation dialog.</p>
+          <h3>Type DELETE to confirm</h3>
+          <p>Type <code>DELETE</code> and press <strong>Permanently Delete My Account</strong>. Your account and all data are removed immediately.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Method 2: on the web -->
+    <p class="steps-heading" style="margin-top:2.5rem">Option 2 — On the web</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Sign in to the web app</h3>
+          <p>Go to <a href="https://app.fitclan.ca/login" data-app-path="/login" style="color:var(--green);text-decoration:none">app.fitclan.ca</a> and sign in with the account you want to delete.</p>
         </div>
       </div>
       <div class="step">
-        <div class="step-num">4</div>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Open Profile → Delete Account</h3>
+          <p>From your <code>Profile</code> page, scroll to the bottom and select <strong>Delete Account</strong>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
         <div class="step-body">
           <h3>Type DELETE to confirm</h3>
-          <p>Type <code>DELETE</code> in the text field and press <strong>Permanently Delete My Account</strong>. Your account and all data are removed immediately.</p>
+          <p>Confirm by typing <code>DELETE</code>. Your account and all associated data are removed immediately.</p>
         </div>
       </div>
     </div>
@@ -303,9 +322,9 @@
 
     <!-- Email fallback -->
     <div class="email-box">
-      <h2>Can't access the app?</h2>
+      <h2>Option 3 — Can't sign in?</h2>
       <p>
-        If you no longer have access to the app, email us directly. Include the email address associated with your FitClan account and we'll delete it within 7 business days.
+        If you've lost access to your account, email us directly. Include the email address associated with your FitClan account and we'll delete it within 7 business days.
       </p>
       <a href="mailto:support@fitclan.ca?subject=Account%20Deletion%20Request&body=Please%20delete%20my%20FitClan%20account.%20My%20account%20email%20is%3A%20" class="email-btn">
         ✉ Email support@fitclan.ca
@@ -318,5 +337,14 @@
 
   </main>
 
+  <!-- ── FitClan web app URL ── change this one line to repoint the web link -->
+  <script>
+    window.FITCLAN_APP_URL = "https://app.fitclan.ca";
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll("[data-app-path]").forEach(function (el) {
+        el.setAttribute("href", window.FITCLAN_APP_URL + el.getAttribute("data-app-path"));
+      });
+    });
+  </script>
 </body>
 </html>

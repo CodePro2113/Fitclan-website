@@ -198,8 +198,13 @@
       words.forEach((word, j) => {
         const span = document.createElement('span');
         span.style.cssText = 'display:inline-block; opacity:0';
-        if (isGradient) span.style.cssText += '; background:inherit; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;';
-        span.textContent = j < words.length - 1 ? word + ' ' : word;
+        // Paint the gradient explicitly on each word (inheriting background
+        // across separate inline-block boxes renders transparent).
+        if (isGradient) span.style.cssText += '; background:linear-gradient(135deg, hsl(159,93%,50%) 0%, hsl(170,90%,55%) 50%, hsl(217,91%,60%) 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;';
+        // Word gap via margin (a trailing space inside an inline-block gets
+        // trimmed → "YourClan"; margin is immune to whitespace collapse).
+        if (j < words.length - 1) span.style.marginRight = '0.26em';
+        span.textContent = word;
         wrapper.appendChild(span);
 
         tl.fromTo(span,

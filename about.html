@@ -379,10 +379,13 @@
         <li><a class='nav-link' href='/#how'>How It Works</a></li>
         <li><a class='nav-link' href='/#download'>Download</a></li>
       </ul>
-      <a class='nav-cta' href='/#download'>
-        <span>Get the App</span>
-        <div class="btn-glow"></div>
-      </a>
+      <div class="nav-actions">
+        <a href="https://app.fitclan.ca/login" data-app-path="/login" class="nav-login">Log in</a>
+        <a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="nav-cta">
+          <span>Sign up free</span>
+          <div class="btn-glow"></div>
+        </a>
+      </div>
     </div>
   </nav>
 
@@ -576,6 +579,16 @@
         el.addEventListener('mouseleave',function(){c.classList.remove('hover');f.classList.remove('hover');});
       });
     })();
+  </script>
+
+  <!-- ── FitClan web app URL ── change this one line to repoint auth links -->
+  <script>
+    window.FITCLAN_APP_URL = "https://app.fitclan.ca";
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll("[data-app-path]").forEach(function (el) {
+        el.setAttribute("href", window.FITCLAN_APP_URL + el.getAttribute("data-app-path"));
+      });
+    });
   </script>
 </body>
 </html>

@@ -90,14 +90,16 @@ ul { list-style: none; }
 /* ============================================
    AMBIENT ORBS — teal/coral palette
    ============================================ */
-.ambient-orb { position: fixed; border-radius: 50%; filter: blur(140px); pointer-events: none; z-index: 0; will-change: transform; }
-.orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, hsl(159,93%,50%,0.09) 0%, transparent 70%); top: -200px; right: -100px; animation: orbFloat 22s ease-in-out infinite; }
-.orb-2 { width: 550px; height: 550px; background: radial-gradient(circle, hsl(0,100%,71%,0.07)  0%, transparent 70%); bottom: 20%; left: -150px; animation: orbFloat 18s ease-in-out infinite -8s; }
-.orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, hsl(45,100%,60%,0.06) 0%, transparent 70%); top: 45%; left: 40%;  animation: orbFloat 25s ease-in-out infinite -15s; }
+/* Gradient mesh orbs — large, soft, slow-drifting wash across the whole page.
+   Deep charcoal base (body) + three premium teal / blue / violet orbs. */
+.ambient-orb { position: fixed; border-radius: 50%; filter: blur(150px); pointer-events: none; z-index: 0; will-change: transform; }
+.orb-1 { width: 760px; height: 760px; background: radial-gradient(circle, hsl(159,93%,50%,0.13) 0%, transparent 70%); top: -240px; right: -140px; animation: orbFloat 30s ease-in-out infinite; }
+.orb-2 { width: 640px; height: 640px; background: radial-gradient(circle, hsl(217,91%,60%,0.12) 0%, transparent 70%); bottom: 8%;   left: -180px; animation: orbFloat 26s ease-in-out infinite -9s; }
+.orb-3 { width: 480px; height: 480px; background: radial-gradient(circle, hsl(265,85%,62%,0.07) 0%, transparent 70%); top: 42%;    left: 44%;   animation: orbFloat 34s ease-in-out infinite -17s; }
 @keyframes orbFloat {
-  0%,100% { transform: translate(0,0) scale(1); }
-  33%     { transform: translate(50px,-70px) scale(1.06); }
-  66%     { transform: translate(-40px,50px) scale(0.94); }
+  0%,100% { transform: translate3d(0,0,0) scale(1); }
+  33%     { transform: translate3d(40px,-56px,0) scale(1.07); }
+  66%     { transform: translate3d(-32px,40px,0) scale(0.93); }
 }
 
 /* ============================================
@@ -125,6 +127,11 @@ ul { list-style: none; }
 .nav-cta:hover { box-shadow: 0 0 40px var(--teal-glow); transform: translateY(-1px); }
 .btn-glow { position: absolute; inset: 0; background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.3), transparent 60%); opacity: 0; transition: opacity .3s; }
 .nav-cta:hover .btn-glow { opacity: 1; }
+.nav-actions { display: flex; align-items: center; gap: 22px; }
+.nav-login { font-size: .9rem; font-weight: 600; color: var(--text-muted); transition: color .2s; position: relative; padding: 4px 0; }
+.nav-login::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 1px; background: var(--teal); transition: width .3s; }
+.nav-login:hover { color: var(--text); }
+.nav-login:hover::after { width: 100%; }
 .nav-burger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: none; padding: 4px; }
 .nav-burger span { display: block; width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: transform .3s, opacity .3s; }
 
@@ -139,40 +146,31 @@ ul { list-style: none; }
    HERO
    ============================================ */
 .hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; padding: 120px 32px 80px; }
+/* Soft mesh wash focused behind the headline — no rotation, just a slow
+   breathe. Pairs with the drifting ambient orbs for depth without busyness. */
 .hero-bg-gradient {
   position: absolute;
-  inset: -20%;
-  width: 140%;
-  height: 140%;
+  inset: 0;
   z-index: 2;
   pointer-events: none;
   will-change: transform, opacity;
-  background: conic-gradient(
-    from 0deg at 30% 50%,
-    transparent 0deg,
-    hsl(159, 93%, 50%, 0.13) 55deg,
-    hsl(217, 91%, 60%, 0.09) 115deg,
-    hsl(170, 90%, 45%, 0.10) 165deg,
-    transparent 225deg,
-    hsl(159, 93%, 50%, 0.05) 310deg,
-    transparent 360deg
-  );
-  filter: blur(55px);
-  animation: auroraShift 18s ease-in-out infinite;
+  background:
+    radial-gradient(55% 60% at 30% 38%, hsl(159, 93%, 50%, 0.14) 0%, transparent 60%),
+    radial-gradient(50% 55% at 70% 64%, hsl(217, 91%, 60%, 0.12) 0%, transparent 62%);
+  filter: blur(64px);
+  animation: heroGlow 24s ease-in-out infinite;
 }
-@keyframes auroraShift {
-  0%   { transform: rotate(-12deg) scale(1);    opacity: 0.8; }
-  25%  { transform: rotate(10deg)  scale(1.05); opacity: 1;   }
-  50%  { transform: rotate(22deg)  scale(1.02); opacity: 0.85; }
-  75%  { transform: rotate(8deg)   scale(0.97); opacity: 0.95; }
-  100% { transform: rotate(-12deg) scale(1);    opacity: 0.8; }
+@keyframes heroGlow {
+  0%,100% { transform: scale(1)    translateY(0);     opacity: 0.85; }
+  50%     { transform: scale(1.05) translateY(-1.5%); opacity: 1;    }
 }
 
-/* Scanline overlay */
+/* Premium vignette — gently darkens the edges toward the charcoal base
+   so the hero content sits in a soft pool of light. */
 .hero::before {
   content: '';
   position: absolute; inset: 0; z-index: 3;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.03) 2px, rgba(0,0,0,.03) 4px);
+  background: radial-gradient(125% 125% at 50% 32%, transparent 55%, hsl(240,3%,7%,0.6) 100%);
   pointer-events: none;
 }
 
@@ -238,6 +236,16 @@ ul { list-style: none; }
 .btn-arrow { transition: transform .2s; }
 .btn-ghost:hover .btn-arrow { transform: translateX(4px); }
 .btn-xl { padding: 20px 40px; font-size: 1.1rem; }
+
+/* Store badge button (secondary, sits beside the primary Sign up CTA) */
+.btn-store {
+  position: relative; display: inline-flex; align-items: center; gap: 14px;
+  padding: 14px 28px; border: 1px solid var(--border);
+  border-radius: 50px; color: var(--text); overflow: hidden;
+  transition: color .2s, border-color .2s, background .2s, transform .2s;
+}
+.btn-store:hover { border-color: hsl(159,93%,50%,0.4); background: hsl(159,93%,50%,0.05); transform: translateY(-2px); }
+.btn-store .play-icon { width: 22px; height: 22px; }
 
 /* Hero stats */
 .hero-stats { display: flex; align-items: center; gap: 32px; opacity: 0; }
@@ -1116,7 +1124,7 @@ body::after {
   .showcase-phones-wrap { justify-content: flex-start; padding: 0 32px 16px; }
 }
 @media (max-width: 768px) {
-  .nav-links, .nav-cta { display: none; }
+  .nav-links, .nav-cta, .nav-actions { display: none; }
   .nav-burger { display: flex; }
   .hero { padding: 100px 24px 60px; }
   .features-grid { grid-template-columns: 1fr; }
@@ -1125,6 +1133,7 @@ body::after {
   .testi-grid { grid-template-columns: 1fr; }
   .notif-layout { grid-template-columns: 1fr; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .hero-content { margin-left: 0; max-width: 100%; }
   .hero-stats { flex-direction: column; gap: 16px; }
   .hero-stat-divider { display: none; }
   .cursor, .cursor-follower { display: none; }
