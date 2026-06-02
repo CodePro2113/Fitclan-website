@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — FitClan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal:       hsl(159, 93%, 50%);
+      --teal-dim:   hsl(159, 93%, 50%, 0.15);
+      --teal-glow:  hsl(159, 93%, 50%, 0.3);
+      --blue:       hsl(217, 91%, 60%);
+      --orange:     hsl(28, 90%, 58%);
+      --orange-dim: hsl(28, 90%, 58%, 0.15);
+      --red-dim:    hsl(0, 72%, 60%, 0.12);
+      --red-text:   hsl(0, 72%, 65%);
+      --bg:         hsl(228, 12%, 6%);
+      --bg2:        hsl(228, 10%, 9%);
+      --bg3:        hsl(228, 8%, 12%);
+      --bg4:        hsl(228, 6%, 16%);
+      --bg5:        hsl(228, 5%, 20%);
+      --text:       hsl(0, 0%, 96%);
+      --text-2:     hsl(0, 0%, 75%);
+      --muted:      hsl(0, 0%, 50%);
+      --border:     hsl(228, 8%, 16%);
+      --border-2:   hsl(228, 8%, 20%);
+      --sidebar-w:  260px;
+      --font-h:     'Space Grotesk', sans-serif;
+      --font-b:     'Inter', sans-serif;
+      --radius-lg:  20px;
+      --radius-md:  14px;
+      --radius-sm:  10px;
+    }
+    html { height: 100%; }
+    body { font-family: var(--font-b); background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: var(--font-b); cursor: pointer; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ── Loading ── */
+    #loadingScreen {
+      position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+      display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.25rem;
+    }
+    .load-logo { display: flex; align-items: center; gap: 0.65rem; }
+    .load-logo-text {
+      font-family: var(--font-h); font-weight: 800; font-size: 1.4rem;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .load-spinner {
+      width: 28px; height: 28px; border: 2.5px solid var(--border);
+      border-top-color: var(--teal); border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Ambient orb ── */
+    .orb-bg {
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, hsl(159,93%,50%,0.09) 0%, transparent 65%);
+      top: -350px; right: -250px; filter: blur(120px);
+      animation: orbDrift 32s ease-in-out infinite;
+    }
+    @keyframes orbDrift { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,-50px) scale(1.06)} }
+    @media (prefers-reduced-motion: reduce) { .orb-bg { animation: none; } }
+
+    /* ══════════════════════════════════
+       LAYOUT
+    ══════════════════════════════════ */
+    #app { display: none; min-height: 100vh; }
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ══════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      z-index: 100; overflow: hidden;
+    }
+
+    /* Logo */
+    .sidebar-header {
+      padding: 1.75rem 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 0.65rem; }
+    .sidebar-logo-text {
+      font-family: var(--font-h); font-weight: 800; font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* User card at top */
+    .sidebar-user {
+      margin: 1.25rem 1.25rem 0;
+      padding: 1rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+    .sidebar-user-top { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.65rem; }
+    .avatar-circle {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-weight: 800; font-size: 0.85rem;
+      color: hsl(228,12%,6%); flex-shrink: 0;
+    }
+    .sidebar-uname { font-family: var(--font-h); font-weight: 700; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-uemail { font-size: 0.7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Rank badge (Option C) */
+    .rank-badge {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .rank-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+    .rank-chip {
+      font-family: var(--font-h); font-size: 0.7rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      background: var(--teal-dim); color: var(--teal);
+    }
+
+    /* Nav sections */
+    .nav-body { flex: 1; padding: 1.25rem 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.25rem; }
+    .nav-section-label {
+      font-size: 0.65rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .1em;
+      padding: 0 0.5rem; margin: 1rem 0 0.35rem;
+    }
+    .nav-section-label:first-child { margin-top: 0; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.75rem 0.85rem; border-radius: var(--radius-sm);
+      font-size: 0.875rem; font-weight: 500; color: var(--muted);
+      cursor: pointer; transition: all .15s; border: none; background: none;
+      text-align: left; width: 100%; position: relative;
+    }
+    .nav-item:hover { background: var(--bg3); color: var(--text-2); }
+    .nav-item.active {
+      background: var(--teal-dim); color: var(--text);
+    }
+    .nav-item.active::before {
+      content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+      width: 3px; background: var(--teal); border-radius: 0 3px 3px 0;
+    }
+    .nav-item.active .nav-icon { color: var(--teal); }
+    .nav-icon { flex-shrink: 0; width: 18px; height: 18px; }
+
+    /* Bottom sign-out */
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .btn-sidebar-out {
+      display: flex; align-items: center; gap: 0.65rem;
+      width: 100%; padding: 0.7rem 0.85rem; border-radius: var(--radius-sm);
+      background: none; border: none; color: var(--muted);
+      font-size: 0.8rem; font-weight: 500; transition: all .15s;
+    }
+    .btn-sidebar-out:hover { background: var(--bg3); color: var(--text-2); }
+
+    /* ══════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════ */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; position: relative; z-index: 1; min-height: 100vh; }
+
+    /* Top bar */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: hsl(228,12%,6%,0.85); backdrop-filter: blur(16px);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .top-greeting { font-family: var(--font-h); font-size: 1.05rem; font-weight: 700; }
+    .top-clan { font-size: 0.75rem; color: var(--teal); font-weight: 600; margin-top: 1px; }
+    .top-chips { display: flex; align-items: center; gap: 0.6rem; }
+    .top-chip {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.35rem 0.75rem; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--bg2);
+      font-size: 0.75rem; font-weight: 600; color: var(--text-2);
+    }
+    .top-chip svg { flex-shrink: 0; }
+    .top-chip.streak { color: var(--orange); border-color: var(--orange-dim); background: var(--orange-dim); }
+    .top-chip.rank { color: var(--teal); border-color: var(--teal-dim); background: var(--teal-dim); }
+
+    .content { padding: 2rem; max-width: 1120px; }
+
+    /* ══════════════════════════════════
+       POINTS HERO BANNER
+    ══════════════════════════════════ */
+    .points-banner {
+      border-radius: var(--radius-lg);
+      padding: 2rem 2.25rem;
+      margin-bottom: 1.75rem;
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, hsl(159,93%,50%,0.12) 0%, hsl(217,91%,60%,0.08) 50%, transparent 100%);
+      border: 1px solid hsl(159,93%,50%,0.2);
+    }
+    .points-banner::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 60% 80% at 5% 50%, hsl(159,93%,50%,0.08) 0%, transparent 70%);
+    }
+    .points-banner-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; position: relative; }
+    .pb-left {}
+    .pb-eyebrow { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--teal); margin-bottom: 0.35rem; }
+    .pb-num {
+      font-family: var(--font-h); font-size: 4.5rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--teal) 0%, var(--blue) 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .pb-sub { font-size: 0.85rem; color: var(--text-2); margin-top: 0.5rem; }
+    .pb-sub strong { color: var(--text); }
+    .pb-clan { font-size: 0.78rem; color: var(--teal); font-weight: 600; margin-top: 4px; }
+    .pb-right { display: flex; gap: 1.25rem; flex-shrink: 0; }
+    .pb-stat {
+      text-align: center;
+      background: hsl(228,10%,9%,0.6);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1.25rem;
+      min-width: 90px;
+    }
+    .pb-stat-val { font-family: var(--font-h); font-size: 2rem; font-weight: 800; line-height: 1; }
+    .pb-stat-val.streak-val { color: var(--orange); }
+    .pb-stat-val.rank-val { color: var(--teal); }
+    .pb-stat-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-top: 4px; }
+
+    /* XP bar (Option C) */
+    .xp-bar-wrap { margin-top: 1.25rem; position: relative; }
+    .xp-bar-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .xp-bar-label strong { color: var(--text-2); }
+    .xp-bar-track { height: 6px; background: var(--bg4); border-radius: 4px; overflow: hidden; }
+    .xp-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--teal), var(--blue)); transition: width 1.2s cubic-bezier(.16,1,.3,1); }
+
+    /* ══════════════════════════════════
+       STATS GRID (2x2 tall cards)
+    ══════════════════════════════════ */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.75rem; }
+
+    .stat-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.4rem 1.25rem;
+      transition: border-color .2s, transform .2s;
+      position: relative; overflow: hidden;
+    }
+    .stat-card:hover { border-color: hsl(159,93%,50%,0.35); transform: translateY(-2px); }
+    .stat-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      opacity: 0; transition: opacity .2s;
+    }
+    .stat-card:hover::after { opacity: 1; }
+
+    .stat-card-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--teal-dim);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1rem; color: var(--teal);
+    }
+    .stat-card.workout-card .stat-card-icon { background: hsl(217,91%,60%,0.12); color: var(--blue); }
+    .stat-card.calories-card .stat-card-icon { background: var(--orange-dim); color: var(--orange); }
+    .stat-card.water-card .stat-card-icon { background: hsl(200,80%,55%,0.12); color: hsl(200,80%,65%); }
+
+    .stat-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem; }
+    .stat-pts-badge {
+      font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+      background: var(--teal-dim); color: var(--teal);
+    }
+    .stat-val { font-family: var(--font-h); font-size: 2rem; font-weight: 800; line-height: 1; }
+    .stat-unit { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+    .stat-label { font-size: 0.75rem; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .06em; margin-top: 0.6rem; }
+    .stat-progress { margin-top: 0.75rem; }
+    .stat-bar-track { height: 4px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; border-radius: 3px; transition: width .9s cubic-bezier(.16,1,.3,1); }
+    .stat-bar-fill.steps { background: linear-gradient(90deg, var(--teal), var(--blue)); }
+    .stat-bar-fill.workout { background: linear-gradient(90deg, var(--blue), hsl(250,80%,65%)); }
+    .stat-bar-fill.calories { background: linear-gradient(90deg, var(--orange), hsl(15,85%,55%)); }
+    .stat-bar-fill.water { background: linear-gradient(90deg, hsl(200,80%,55%), hsl(210,90%,65%)); }
+    .stat-goal { font-size: 0.68rem; color: var(--muted); margin-top: 0.4rem; }
+
+    /* ══════════════════════════════════
+       TWO-COLUMN LAYOUT
+    ══════════════════════════════════ */
+    .two-col { display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; }
+    .section-title {
+      font-family: var(--font-h); font-size: 0.9rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; color: var(--text-2);
+      margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-title-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--teal); flex-shrink: 0;
+    }
+
+    /* ── Card base ── */
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.4rem;
+    }
+
+    /* ══════════════════════════════════
+       LEADERBOARD
+    ══════════════════════════════════ */
+    /* Podium (Option C style) */
+    .podium { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+    .podium-card {
+      border-radius: var(--radius-md); padding: 1rem 0.75rem; text-align: center;
+      border: 1px solid var(--border); background: var(--bg2); position: relative;
+    }
+    .podium-card.p1 { border-color: hsl(159,93%,50%,0.35); background: hsl(159,93%,50%,0.05); }
+    .podium-card.p2 { border-color: hsl(228,8%,22%); }
+    .podium-card.p3 { border-color: hsl(228,8%,22%); }
+    .podium-medal {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-size: 0.65rem; font-weight: 800;
+    }
+    .podium-medal.g { background: linear-gradient(135deg, var(--teal), var(--blue)); color: hsl(228,12%,6%); }
+    .podium-medal.s { background: var(--bg4); color: var(--text-2); }
+    .podium-medal.b { background: var(--bg3); color: var(--muted); }
+    .podium-avatar {
+      width: 44px; height: 44px; border-radius: 50%; margin: 0.5rem auto 0.5rem;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-weight: 800; font-size: 1rem;
+      color: hsl(228,12%,6%);
+    }
+    .podium-card.p2 .podium-avatar, .podium-card.p3 .podium-avatar { background: var(--bg4); color: var(--text-2); font-size: 0.9rem; }
+    .podium-name { font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .podium-pts { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+    .podium-card.p1 .podium-pts { color: var(--teal); font-weight: 700; }
+
+    .lb-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .lb-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; border-radius: var(--radius-md);
+      border: 1px solid var(--border); background: var(--bg2);
+      transition: border-color .15s;
+    }
+    .lb-item:hover { border-color: var(--border-2); }
+    .lb-item.is-me { background: var(--teal-dim); border-color: hsl(159,93%,50%,0.25); }
+    .lb-rank {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--bg3); display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-weight: 800; font-size: 0.75rem;
+      flex-shrink: 0; color: var(--muted);
+    }
+    .lb-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--bg4);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-weight: 700; font-size: 0.7rem;
+      color: var(--text-2); flex-shrink: 0;
+    }
+    .lb-item.is-me .lb-avatar { background: linear-gradient(135deg, var(--teal), var(--blue)); color: hsl(228,12%,6%); }
+    .lb-info { flex: 1; min-width: 0; }
+    .lb-name { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-bar-wrap { width: 80px; height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; margin-top: 5px; }
+    .lb-bar { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--teal), var(--blue)); transition: width .6s ease; }
+    .lb-pts { font-size: 0.8rem; font-weight: 700; color: var(--teal); white-space: nowrap; }
+
+    .no-clan-banner {
+      border: 1px dashed hsl(159,93%,50%,0.3); background: hsl(159,93%,50%,0.03);
+      border-radius: var(--radius-md); padding: 1.5rem; text-align: center;
+    }
+    .no-clan-banner strong { font-family: var(--font-h); }
+    .no-clan-banner p { color: var(--muted); font-size: 0.8rem; margin-top: 0.35rem; }
+
+    /* Sort pills */
+    .sort-bar { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .sort-btn {
+      padding: 0.35rem 0.9rem; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+      border: 1px solid var(--border); background: var(--bg3); color: var(--muted);
+      cursor: pointer; transition: all .15s;
+    }
+    .sort-btn:hover { color: var(--text-2); border-color: var(--border-2); }
+    .sort-btn.active { background: var(--teal-dim); color: var(--teal); border-color: hsl(159,93%,50%,0.4); }
+
+    /* ══════════════════════════════════
+       MISSIONS (Quest log — Option C)
+    ══════════════════════════════════ */
+    .mission-item {
+      display: flex; align-items: flex-start; gap: 0.85rem;
+      padding: 0.9rem 1rem; border-radius: var(--radius-md);
+      border: 1px solid var(--border); background: var(--bg2); margin-bottom: 0.5rem;
+      transition: border-color .15s;
+    }
+    .mission-item:hover { border-color: var(--border-2); }
+    .mission-item.done { opacity: 0.6; }
+    .mission-check {
+      width: 22px; height: 22px; border-radius: 6px;
+      border: 2px solid var(--border-2); flex-shrink: 0; margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .mission-check.done { background: var(--teal); border-color: var(--teal); }
+    .mission-body { flex: 1; min-width: 0; }
+    .mission-title { font-size: 0.875rem; font-weight: 600; }
+    .mission-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+    .mission-pts {
+      font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+      background: var(--teal-dim); color: var(--teal); white-space: nowrap; flex-shrink: 0; align-self: flex-start; margin-top: 2px;
+    }
+
+    /* ══════════════════════════════════
+       ACTIVITY FEED
+    ══════════════════════════════════ */
+    .feed-item {
+      display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.8rem 0; border-bottom: 1px solid var(--border);
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-icon-wrap {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; color: var(--teal);
+    }
+    .feed-label { font-size: 0.875rem; font-weight: 500; }
+    .feed-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .feed-pts { font-size: 0.78rem; font-weight: 700; color: var(--teal); margin-left: auto; white-space: nowrap; }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .empty-state svg { margin-bottom: 0.75rem; opacity: 0.4; }
+    .empty-state p { font-size: 0.85rem; margin-top: 0.4rem; }
+
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.9rem; border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      border: none; color: hsl(228,12%,6%); font-size: 0.9rem; font-weight: 700;
+      font-family: var(--font-h); cursor: pointer; transition: opacity .15s, transform .15s;
+    }
+    .btn-primary:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ══════════════════════════════════
+       PROFILE TAB
+    ══════════════════════════════════ */
+    .profile-avatar-lg {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-weight: 800; font-size: 1.75rem;
+      color: hsl(228,12%,6%);
+    }
+    .profile-header {
+      display: flex; align-items: center; gap: 1.25rem;
+      padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem;
+    }
+    .profile-name { font-family: var(--font-h); font-size: 1.5rem; font-weight: 800; }
+    .profile-email { color: var(--muted); font-size: 0.875rem; margin-top: 3px; }
+    .profile-stat { font-size: 0.8rem; color: var(--teal); font-weight: 700; margin-top: 6px; }
+    .info-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-key { color: var(--muted); font-size: 0.8rem; }
+    .info-val { font-weight: 600; }
+    .btn-signout {
+      display: flex; align-items: center; gap: 0.6rem;
+      width: 100%; padding: 0.85rem 1.25rem;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text-2); font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      transition: background .15s; margin-top: 1.5rem;
+    }
+    .btn-signout:hover { background: var(--bg4); }
+    .btn-delete {
+      display: flex; align-items: center; gap: 0.6rem;
+      width: 100%; padding: 0.85rem 1.25rem;
+      background: var(--red-dim); border: 1px solid hsl(0,72%,60%,0.2); border-radius: var(--radius-sm);
+      color: var(--red-text); font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      transition: background .15s; margin-top: 0.75rem;
+    }
+    .btn-delete:hover { background: hsl(0,72%,60%,0.18); }
+
+    /* ══════════════════════════════════
+       TOAST + MODAL
+    ══════════════════════════════════ */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      padding: 0.75rem 1.25rem; border-radius: var(--radius-sm);
+      font-size: 0.875rem; font-weight: 600; z-index: 9999;
+      opacity: 0; transform: translateY(10px); transition: all .3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.ok { background: hsl(159,93%,50%,0.15); border: 1px solid hsl(159,93%,50%,0.4); color: var(--teal); }
+    .toast.err { background: hsl(0,72%,60%,0.15); border: 1px solid hsl(0,72%,60%,0.4); color: var(--red-text); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: hsl(228,12%,4%,0.85);
+      backdrop-filter: blur(8px); z-index: 1000;
+      display: none; align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: var(--bg2); border: 1px solid hsl(0,72%,60%,0.25);
+      border-radius: var(--radius-lg); padding: 2rem; max-width: 420px; width: 100%;
+    }
+    .modal-title { font-family: var(--font-h); font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--red-text); }
+    .modal-sub { color: var(--muted); font-size: 0.875rem; line-height: 1.6; margin-bottom: 1.25rem; }
+    .modal-input {
+      width: 100%; padding: 0.75rem 1rem;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem;
+      font-family: var(--font-b); outline: none; margin-bottom: 1rem; transition: border-color .2s;
+    }
+    .modal-input:focus { border-color: hsl(0,72%,60%,0.5); }
+    .modal-btns { display: flex; gap: 0.75rem; }
+    .modal-cancel {
+      flex: 1; padding: 0.75rem; border-radius: var(--radius-sm);
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text-2); font-weight: 600; cursor: pointer; transition: background .15s;
+    }
+    .modal-cancel:hover { background: var(--bg4); }
+    .modal-confirm {
+      flex: 1; padding: 0.75rem; border-radius: var(--radius-sm);
+      background: var(--red-dim); border: 1px solid hsl(0,72%,60%,0.3);
+      color: var(--red-text); font-weight: 700; cursor: pointer; transition: background .15s;
+    }
+    .modal-confirm:hover:not(:disabled) { background: hsl(0,72%,60%,0.2); }
+    .modal-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ══════════════════════════════════
+       BOTTOM NAV (mobile)
+    ══════════════════════════════════ */
+    .bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      background: hsl(228,10%,9%,0.96); border-top: 1px solid var(--border);
+      backdrop-filter: blur(16px); z-index: 100;
+      padding: 0.4rem 0 calc(0.4rem + env(safe-area-inset-bottom));
+    }
+    .bn-items { display: flex; }
+    .bn-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 0.45rem; cursor: pointer; border: none; background: none;
+      color: var(--muted); font-size: 0.62rem; font-weight: 600; transition: color .15s;
+    }
+    .bn-item.active { color: var(--teal); }
+    .bn-item svg { width: 22px; height: 22px; }
+
+    /* Tabs */
+    .tab { display: none; }
+    .tab.active { display: block; }
+
+    /* ── Avatar picker ── */
+    .avatar-picker-wrap { margin-top: 1rem; }
+    .avatar-picker-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 0.6rem; }
+    .avatar-swatches { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .avatar-swatch {
+      width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+      border: 3px solid transparent; transition: border-color .15s, transform .15s;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-weight: 800; font-size: 0.7rem;
+      color: hsl(228,12%,6%);
+    }
+    .avatar-swatch:hover { transform: scale(1.12); }
+    .avatar-swatch.selected { border-color: white; box-shadow: 0 0 0 1px var(--border-2); }
+
+    /* ── Top-bar avatar chip ── */
+    .top-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-h); font-weight: 800; font-size: 0.7rem;
+      color: hsl(228,12%,6%); cursor: pointer; flex-shrink: 0;
+      border: 2px solid hsl(228,8%,22%); transition: border-color .15s;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+    }
+    .top-avatar:hover { border-color: var(--teal); }
+
+    /* ── Conquest tab ── */
+    #conquest-map {
+      width: 100%; height: 460px; border-radius: var(--radius-lg);
+      border: 1px solid var(--border); background: hsl(228,12%,5%);
+      margin-bottom: 1.25rem; overflow: hidden;
+      position: relative; z-index: 1;
+    }
+    /* Override Leaflet's z-index inside the dashboard */
+    #conquest-map .leaflet-pane { z-index: 4 !important; }
+    #conquest-map .leaflet-control { z-index: 5 !important; }
+    #conquest-map .leaflet-top, #conquest-map .leaflet-bottom { z-index: 5 !important; }
+
+    .conquest-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem; align-items: start; }
+    @media (max-width: 860px) { .conquest-layout { grid-template-columns: 1fr; } }
+
+    .conquest-panel {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem;
+      position: sticky; top: 80px;
+    }
+    .conquest-panel-title {
+      font-family: var(--font-h); font-size: 0.85rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+    .conquest-territory-name {
+      font-family: var(--font-h); font-size: 1.25rem; font-weight: 800;
+      margin-bottom: 0.3rem;
+    }
+    .conquest-owner-row { font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem; }
+    .conquest-owner-row span { font-weight: 600; color: var(--text-2); }
+    .conquest-status-mine {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 0.85rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+      background: var(--teal-dim); color: var(--teal);
+      border: 1px solid hsl(159,93%,50%,0.3); margin-bottom: 1rem;
+    }
+    .btn-attack {
+      width: 100%; padding: 0.85rem; border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, hsl(0,80%,55%), hsl(20,90%,52%));
+      border: none; color: white; font-size: 0.9rem; font-weight: 700;
+      font-family: var(--font-h); cursor: pointer; transition: opacity .15s, transform .15s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .btn-attack:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .btn-attack:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .conquest-hint { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 0.6rem; line-height: 1.5; }
+    .conquest-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-top: 1.25rem; }
+    .conquest-stat-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 0.75rem; text-align: center;
+    }
+    .conquest-stat-val { font-family: var(--font-h); font-size: 1.5rem; font-weight: 800; color: var(--teal); }
+    .conquest-stat-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-top: 2px; }
+    .conquest-legend { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.25rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .conquest-setup-banner {
+      background: var(--teal-dim); border: 1px solid hsl(159,93%,50%,0.25);
+      border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;
+    }
+    .conquest-setup-banner strong { font-family: var(--font-h); color: var(--teal); }
+    .conquest-setup-banner pre {
+      background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 0.75rem; font-size: 0.72rem; color: var(--text-2); margin-top: 0.75rem;
+      white-space: pre-wrap; word-break: break-all; overflow-x: auto;
+    }
+
+    /* Spinner */
+    .spinner-sm {
+      width: 16px; height: 16px; border: 2px solid hsl(228,12%,6%,0.3);
+      border-top-color: hsl(228,12%,6%); border-radius: 50%;
+      animation: spin .7s linear infinite; display: inline-block;
+    }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 1000px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .bottom-nav { display: block; }
+      .content { padding: 1.25rem 1rem 5rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .log-grid { grid-template-columns: 1fr; }
+      .top-bar { padding: 1rem 1.25rem; }
+      .pb-right { gap: 0.75rem; }
+      .pb-stat { min-width: 70px; padding: 0.75rem 0.85rem; }
+      .pb-num { font-size: 3rem; }
+    }
+    @media (max-width: 500px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .podium { grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loadingScreen">
+    <div class="load-logo">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+        <defs><linearGradient id="llg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="hsl(159,93%,50%)"/><stop offset="100%" stop-color="hsl(217,91%,60%)"/>
+        </linearGradient></defs>
+        <path d="M12 2C12 2 7 7 7 12.5a5 5 0 0010 0C17 7 12 2 12 2z" fill="url(#llg)" opacity=".9"/>
+        <path d="M12 8c0 0-2.5 3-2.5 4.5a2.5 2.5 0 005 0C14.5 11 12 8 12 8z" fill="white" opacity=".7"/>
+      </svg>
+      <span class="load-logo-text">FitClan</span>
+    </div>
+    <div class="load-spinner"></div>
+  </div>
+
+  <div class="orb-bg"></div>
+
+  <!-- App -->
+  <div id="app">
+    <div class="layout">
+
+      <!-- ═══ SIDEBAR ═══ -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <defs><linearGradient id="slg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="hsl(159,93%,50%)"/><stop offset="100%" stop-color="hsl(217,91%,60%)"/>
+              </linearGradient></defs>
+              <path d="M12 2C12 2 7 7 7 12.5a5 5 0 0010 0C17 7 12 2 12 2z" fill="url(#slg)" opacity=".9"/>
+              <path d="M12 8c0 0-2.5 3-2.5 4.5a2.5 2.5 0 005 0C14.5 11 12 8 12 8z" fill="white" opacity=".7"/>
+            </svg>
+            <span class="sidebar-logo-text">FitClan</span>
+          </div>
+        </div>
+
+        <!-- User card -->
+        <div class="sidebar-user">
+          <div class="sidebar-user-top">
+            <div class="avatar-circle" id="sidebarAvatar">?</div>
+            <div style="min-width:0;flex:1;">
+              <div class="sidebar-uname" id="sidebarName">Loading…</div>
+              <div class="sidebar-uemail" id="sidebarEmail"></div>
+            </div>
+          </div>
+          <div class="rank-badge">
+            <span class="rank-label">Rank in clan</span>
+            <span class="rank-chip" id="sidebarRank">—</span>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <div class="nav-body">
+          <div class="nav-section-label">Main</div>
+          <button class="nav-item active" data-tab="home">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+          </button>
+          <button class="nav-item" data-tab="leaderboard">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            Leaderboard
+          </button>
+          <button class="nav-item" data-tab="conquest">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+            Conquest
+          </button>
+
+          <div class="nav-section-label">Account</div>
+          <button class="nav-item" data-tab="profile">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Profile
+          </button>
+          <a class="nav-item" href="index.html">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            Back to site
+          </a>
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="btn-sidebar-out" id="signOutBtnSidebar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+          </button>
+        </div>
+      </aside>
+
+      <!-- ═══ MAIN ═══ -->
+      <main class="main">
+
+        <!-- Top bar -->
+        <div class="top-bar">
+          <div>
+            <div class="top-greeting" id="topGreeting">Dashboard</div>
+            <div class="top-clan" id="topClan"></div>
+          </div>
+          <div class="top-chips">
+            <div class="top-chip streak" id="topStreak">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <span id="topStreakVal">0</span> day streak
+            </div>
+            <div class="top-chip rank" id="topRankChip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              <span id="topRankVal">—</span>
+            </div>
+            <div class="top-avatar" id="topAvatar" title="You are signed in" onclick="switchTab('profile')"></div>
+          </div>
+        </div>
+
+        <div class="content">
+
+          <!-- ═══ HOME TAB ═══ -->
+          <div class="tab active" id="tab-home">
+
+            <!-- Points banner -->
+            <div class="points-banner">
+              <div class="points-banner-inner">
+                <div class="pb-left">
+                  <div class="pb-eyebrow">Today's Points</div>
+                  <div class="pb-num" id="todayPts">0</div>
+                  <div class="pb-sub">Total: <strong id="totalPts">0</strong> pts all time</div>
+                  <div class="pb-clan" id="clanTag"></div>
+                </div>
+                <div class="pb-right">
+                  <div class="pb-stat">
+                    <div class="pb-stat-val streak-val" id="streakNum">0</div>
+                    <div class="pb-stat-label">Day Streak</div>
+                  </div>
+                  <div class="pb-stat">
+                    <div class="pb-stat-val rank-val" id="rankNum">#—</div>
+                    <div class="pb-stat-label">Clan Rank</div>
+                  </div>
+                </div>
+              </div>
+              <!-- XP bar -->
+              <div class="xp-bar-wrap">
+                <div class="xp-bar-label">
+                  <span>XP Progress</span>
+                  <strong id="xpLabel">0 / 500 pts to next rank</strong>
+                </div>
+                <div class="xp-bar-track">
+                  <div class="xp-bar-fill" id="xpBar" style="width:0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats grid -->
+            <div class="stats-grid" id="statsGrid">
+              <!-- filled by JS -->
+            </div>
+
+            <div class="two-col">
+              <!-- Left: missions + feed -->
+              <div>
+                <div id="missionsSection" style="margin-bottom:1.75rem;">
+                  <div class="section-title">
+                    <div class="section-title-dot"></div>
+                    Daily Missions
+                  </div>
+                  <div id="missionsList">
+                    <div class="empty-state"><div class="load-spinner" style="margin:0 auto;border-top-color:var(--teal);"></div></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="section-title">
+                    <div class="section-title-dot"></div>
+                    Recent Activity
+                  </div>
+                  <div class="card" id="feedList">
+                    <div class="empty-state"><p>No activities yet — log one!</p></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: top rankings -->
+              <div>
+                <div class="section-title">
+                  <div class="section-title-dot"></div>
+                  Top Rankings
+                </div>
+                <div id="lbPreview">
+                  <div class="empty-state"><div class="load-spinner" style="margin:0 auto;border-top-color:var(--teal);"></div></div>
+                </div>
+                <button onclick="switchTab('leaderboard')" style="width:100%;margin-top:0.85rem;padding:0.65rem;border-radius:var(--radius-sm);background:none;border:1px solid var(--border);color:var(--muted);font-size:0.8rem;font-weight:600;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--border-2)';this.style.color='var(--text-2)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Full leaderboard</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ LEADERBOARD TAB ═══ -->
+          <div class="tab" id="tab-leaderboard">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.5rem;">
+              <h2 style="font-family:var(--font-h);font-size:1.5rem;font-weight:800;">Leaderboard</h2>
+              <div class="sort-bar" id="sortBar">
+                <button class="sort-btn active" data-sort="total">All Time</button>
+                <button class="sort-btn" data-sort="weekly">This Week</button>
+                <button class="sort-btn" data-sort="today">Today</button>
+              </div>
+            </div>
+            <div id="fullLeaderboard">
+              <div class="empty-state"><div class="load-spinner" style="margin:0 auto;border-top-color:var(--teal);"></div></div>
+            </div>
+          </div>
+
+
+          <!-- ═══ CONQUEST TAB ═══ -->
+          <div class="tab" id="tab-conquest">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
+              <div>
+                <h2 style="font-family:var(--font-h);font-size:1.5rem;font-weight:800;">Conquest</h2>
+                <p style="color:var(--muted);font-size:0.875rem;margin-top:0.2rem;">Attack enemy territories to expand your clan's empire</p>
+              </div>
+            </div>
+            <div id="conquestSetupBanner" class="conquest-setup-banner" style="display:none;">
+              <strong>One-time setup required</strong>
+              <p style="font-size:0.82rem;color:var(--text-2);margin-top:0.35rem;">Run this SQL in your Supabase project's SQL Editor to enable territory tracking:</p>
+              <pre>create table territory_control (
+  territory_id text primary key,
+  clan_id uuid,
+  clan_name text,
+  captured_by uuid references auth.users(id),
+  captured_at timestamptz default now()
+);
+alter table territory_control enable row level security;
+create policy "read" on territory_control for select using (true);
+create policy "insert" on territory_control for insert with check (auth.uid() = captured_by);
+-- Only the current capturer can overwrite a territory (prevents rival clans
+-- stealing each other's territory via direct API call without going through
+-- the attack flow in the app).
+create policy "update" on territory_control for update using (true) with check (auth.uid() = captured_by);</pre>
+            </div>
+            <div class="conquest-layout">
+              <div>
+                <div id="conquest-map"></div>
+                <div class="conquest-legend" id="conquestLegend">
+                  <div class="legend-item"><div class="legend-dot" style="background:#00E5A0;"></div> Your clan</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:#60A5FA;"></div> Enemy clan</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:hsl(228,8%,30%);"></div> Unclaimed</div>
+                </div>
+              </div>
+              <div class="conquest-panel">
+                <div class="conquest-panel-title">Territory</div>
+                <div id="conquestPanelBody">
+                  <p style="color:var(--muted);font-size:0.85rem;">Click any territory on the map to see details and attack options.</p>
+                </div>
+                <div class="conquest-stats" id="conquestStats" style="display:none;">
+                  <div class="conquest-stat-card">
+                    <div class="conquest-stat-val" id="cqMine">0</div>
+                    <div class="conquest-stat-lbl">Your Clan</div>
+                  </div>
+                  <div class="conquest-stat-card">
+                    <div class="conquest-stat-val" id="cqTotal" style="color:var(--text-2)">0</div>
+                    <div class="conquest-stat-lbl">Total Claimed</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ PROFILE TAB ═══ -->
+          <div class="tab" id="tab-profile">
+            <div style="max-width:580px;">
+              <div class="profile-header">
+                <div>
+                  <div class="profile-avatar-lg" id="profileAvatarLg">?</div>
+                  <div class="avatar-picker-wrap">
+                    <div class="avatar-picker-label">Choose color</div>
+                    <div class="avatar-swatches" id="avatarSwatches"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="profile-name" id="profileName">Loading…</div>
+                  <div class="profile-email" id="profileEmail"></div>
+                  <div class="profile-stat" id="profileStat"></div>
+                </div>
+              </div><!-- /profile-header -->
+              <div class="card" style="margin-bottom:1rem;">
+                <div class="info-row"><span class="info-key">Username</span><span class="info-val" id="infoName">—</span></div>
+                <div class="info-row"><span class="info-key">Email</span><span class="info-val" id="infoEmail">—</span></div>
+                <div class="info-row"><span class="info-key">Fitness app</span><span class="info-val" id="infoSource">—</span></div>
+                <div class="info-row"><span class="info-key">Member since</span><span class="info-val" id="infoJoined">—</span></div>
+                <div class="info-row"><span class="info-key">Total points</span><span class="info-val" id="infoPoints">—</span></div>
+                <div class="info-row" style="border-bottom:none;"><span class="info-key">Clan</span><span class="info-val" id="infoClan">—</span></div>
+              </div>
+              <button class="btn-signout" id="signOutBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sign out
+              </button>
+              <button class="btn-delete" id="openDeleteBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Delete account &amp; all data
+              </button>
+              <p style="font-size:0.75rem;color:var(--muted);margin-top:0.75rem;">
+                Need help? <a href="delete-account.html" style="color:var(--teal);">Deletion guide</a>
+              </p>
+            </div>
+          </div>
+
+        </div><!-- /content -->
+      </main>
+    </div><!-- /layout -->
+
+    <!-- Bottom nav (mobile) -->
+    <nav class="bottom-nav">
+      <div class="bn-items">
+        <button class="bn-item active" data-tab="home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </button>
+        <button class="bn-item" data-tab="leaderboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          Leaderboard
+        </button>
+        <button class="bn-item" data-tab="conquest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+          Conquest
+        </button>
+        <button class="bn-item" data-tab="profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </button>
+      </div>
+    </nav>
+  </div><!-- /app -->
+
+  <!-- Delete modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-card">
+      <div class="modal-title">Delete your account</div>
+      <div class="modal-sub">This permanently deletes your profile, activities, missions, and all associated data. This cannot be undone.<br><br>Type <strong style="color:var(--red-text);">DELETE</strong> to confirm.</div>
+      <input type="text" class="modal-input" id="deleteConfirmInput" placeholder="Type DELETE" autocomplete="off" />
+      <div class="modal-btns">
+        <button class="modal-cancel" id="cancelDeleteBtn">Cancel</button>
+        <button class="modal-confirm" id="confirmDeleteBtn" disabled>Delete forever</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  (async () => {
+    const SUPABASE_URL = 'https://cujbjttoofjytezdwkyr.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_QFvM6cyt5vxcleN7M9_oAw_VVaz0bta';
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ── Avatar colors ──
+    const AVATAR_COLORS = [
+      '#00E5A0', // teal (default)
+      '#60A5FA', // blue
+      '#F97316', // orange
+      '#A78BFA', // violet
+      '#F472B6', // pink
+      '#34D399', // emerald
+      '#FBBF24', // amber
+      '#F87171', // red
+    ];
+    function getAvatarColor(raw) {
+      if (raw && raw.startsWith('#')) return raw;
+      return AVATAR_COLORS[0];
+    }
+    function applyAvatar(el, name, color) {
+      if (!el) return;
+      el.textContent = initials(name);
+      el.style.background = color || AVATAR_COLORS[0];
+    }
+
+    // ── Activity config (NO EMOJIS) ──
+    const ACTS = {
+      steps:   { label: 'Steps',    unit: 'steps', goal: 10000, ptsPerUnit: 10, unitsPer: 1000 },
+      workout: { label: 'Workout',  unit: 'min',   goal: 30,    ptsPerUnit: 10, unitsPer: 10   },
+      calories:{ label: 'Calories', unit: 'cal',   goal: 500,   ptsPerUnit: 20, unitsPer: 500  },
+      water:   { label: 'Water',    unit: 'glasses',goal: 8,    ptsPerUnit: 10, unitsPer: 8    },
+    };
+
+    const ACT_ICONS = {
+      steps:   `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 4v16M7 4v16M19 4v16"/></svg>`,
+      workout: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 5v14M18 5v14M10 9h4M10 15h4"/></svg>`,
+      calories:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 0-6 6.5-6 11a6 6 0 0 0 12 0C18 8.5 12 2 12 2z"/></svg>`,
+      water:   `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C12 2 5 9 5 14a7 7 0 0 0 14 0C19 9 12 2 12 2z"/></svg>`,
+    };
+
+    const SOURCE_LABELS = {
+      samsung_health:'Samsung Health', google_fit:'Google Fit', fitbit:'Fitbit',
+      apple_health:'Apple Health', other:'Other',
+    };
+
+    // ── State ──
+    let session = null, profile = null, family = null;
+    let clanMembers = [], clanActivities = [];
+    let allMyActs = [], missions = [], sortMode = 'total';
+
+    // ── Utils ──
+    /** Escape HTML special chars before inserting user-supplied strings into innerHTML. */
+    function escHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    function initials(name) {
+      return (name || 'U').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    }
+    function greeting() {
+      const h = new Date().getHours();
+      return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    }
+    function todayKey() { return new Date().toISOString().split('T')[0]; }
+    function weekAgo() { const d = new Date(); d.setDate(d.getDate() - 7); return d; }
+    function calcPts(type, value) {
+      const c = ACTS[type]; if (!c || !value) return 0;
+      return Math.floor(value / c.unitsPer) * c.ptsPerUnit;
+    }
+    function fmtTime(iso) {
+      const d = new Date(iso); const now = new Date();
+      const yd = new Date(now); yd.setDate(now.getDate() - 1);
+      const t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      if (d.toDateString() === now.toDateString()) return `Today · ${t}`;
+      if (d.toDateString() === yd.toDateString()) return `Yesterday · ${t}`;
+      return `${d.toLocaleDateString([], { month: 'short', day: 'numeric' })} · ${t}`;
+    }
+    function computeStreak(acts) {
+      if (!acts.length) return 0;
+      const toKey = d => d.toISOString().split('T')[0];
+      const dates = new Set(acts.map(a => toKey(new Date(a.created_at))));
+      const check = new Date(); let streak = 0;
+      if (!dates.has(toKey(check))) check.setDate(check.getDate() - 1);
+      for (let i = 0; i < 365; i++) {
+        if (dates.has(toKey(check))) { streak++; check.setDate(check.getDate() - 1); } else break;
+      }
+      return streak;
+    }
+    function showToast(msg, type = 'ok') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // ── Tab switching ──
+    window.switchTab = function(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item, .bn-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      document.querySelectorAll(`[data-tab="${name}"]`).forEach(b => b.classList.add('active'));
+    };
+    document.querySelectorAll('[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // ── Sort bar ──
+    document.getElementById('sortBar').addEventListener('click', e => {
+      const btn = e.target.closest('.sort-btn'); if (!btn) return;
+      sortMode = btn.dataset.sort;
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderFullLeaderboard();
+    });
+
+    // ── Auth guard ──
+    const { data: { session: initSession } } = await sb.auth.getSession();
+    if (!initSession) { window.location.href = 'login.html'; return; }
+    session = initSession;
+
+    // Apply pending fitness_source
+    try {
+      const pending = JSON.parse(localStorage.getItem('fitclan_pending_profile') || 'null');
+      if (pending && pending.user_id === session.user.id && pending.fitness_source) {
+        await sb.from('profiles').update({ fitness_source: pending.fitness_source }).eq('id', session.user.id);
+        localStorage.removeItem('fitclan_pending_profile');
+      }
+    } catch {}
+
+    // ── Load data ──
+    const today = todayKey();
+    const todayStart = today + 'T00:00:00.000Z';
+
+    const [profRes, actsRes, missRes, memberRes] = await Promise.all([
+      sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
+      sb.from('activities').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(100),
+      sb.from('daily_missions').select('*').eq('user_id', session.user.id).eq('date', today),
+      sb.from('family_members').select('family_id, families(id, name)').eq('user_id', session.user.id).maybeSingle(),
+    ]);
+
+    profile = profRes.data;
+    allMyActs = actsRes.data || [];
+    missions = missRes.data || [];
+    const membership = memberRes.data;
+
+    // If profile row doesn't exist yet (no DB trigger created it), create one
+    if (!profile) {
+      const fallbackName = session.user.user_metadata?.display_name
+        || session.user.email?.split('@')[0]
+        || 'User';
+      const { data: newProf } = await sb.from('profiles').insert({
+        id: session.user.id,
+        display_name: fallbackName,
+      }).select().single();
+      profile = newProf || { id: session.user.id, display_name: fallbackName };
+    }
+
+    if (membership?.families) {
+      family = membership.families;
+      const { data: members } = await sb.from('family_members')
+        .select('user_id, profiles(display_name, avatar_emoji)')
+        .eq('family_id', family.id);
+      clanMembers = members || [];
+      const memberIds = clanMembers.map(m => m.user_id);
+      if (memberIds.length) {
+        const { data: cActs } = await sb.from('activities')
+          .select('user_id, points, created_at').in('user_id', memberIds);
+        clanActivities = cActs || [];
+      }
+    }
+
+    renderUI();
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+
+    // ── Render ──
+    function renderUI() {
+      const displayName = profile?.display_name || session.user.email?.split('@')[0] || 'User';
+      const email = session.user.email || '';
+      const avatarColor = getAvatarColor(profile?.avatar_emoji);
+
+      // Sidebar user card
+      applyAvatar(document.getElementById('sidebarAvatar'), displayName, avatarColor);
+      document.getElementById('sidebarName').textContent = displayName;
+      document.getElementById('sidebarEmail').textContent = email;
+
+      // Top bar avatar
+      applyAvatar(document.getElementById('topAvatar'), displayName, avatarColor);
+
+      // Points
+      const todayActs = allMyActs.filter(a => a.created_at >= todayStart);
+      const todayPts = todayActs.reduce((s, a) => s + (a.points || 0), 0);
+      const totalPts = allMyActs.reduce((s, a) => s + (a.points || 0), 0);
+      const streak = computeStreak(allMyActs);
+
+      // Rank in clan
+      const lb = buildLeaderboard('total');
+      const myRankIdx = lb.findIndex(m => m.isMe);
+      const rankStr = myRankIdx >= 0 ? `#${myRankIdx + 1}` : '—';
+
+      document.getElementById('sidebarRank').textContent = rankStr;
+      document.getElementById('topGreeting').textContent = greeting() + ', ' + displayName;
+      if (family) document.getElementById('topClan').textContent = family.name;
+      document.getElementById('topStreakVal').textContent = streak;
+      document.getElementById('topRankVal').textContent = rankStr + (family ? ' in ' + family.name : '');
+
+      document.getElementById('todayPts').textContent = todayPts.toLocaleString();
+      document.getElementById('totalPts').textContent = totalPts.toLocaleString();
+      if (family) document.getElementById('clanTag').textContent = family.name;
+      document.getElementById('streakNum').textContent = streak;
+      document.getElementById('rankNum').textContent = rankStr;
+
+      // XP bar — levels at 0, 500, 1500, 3000, 6000, 10000...
+      const levels = [0, 500, 1500, 3000, 6000, 10000, 20000, 50000];
+      let curLevel = 0, nextLevel = 500;
+      for (let i = 0; i < levels.length - 1; i++) {
+        if (totalPts >= levels[i]) { curLevel = levels[i]; nextLevel = levels[i + 1]; }
+      }
+      const xpPct = nextLevel > curLevel ? Math.min(100, ((totalPts - curLevel) / (nextLevel - curLevel)) * 100) : 100;
+      document.getElementById('xpBar').style.width = xpPct + '%';
+      document.getElementById('xpLabel').textContent = `${(totalPts - curLevel).toLocaleString()} / ${(nextLevel - curLevel).toLocaleString()} pts to next rank`;
+
+      // Stats grid
+      const todaySteps   = todayActs.filter(a => a.type === 'steps').reduce((s, a) => s + a.value, 0);
+      const todayWrk     = todayActs.filter(a => a.type === 'workout').reduce((s, a) => s + a.value, 0);
+      const todayCal     = todayActs.filter(a => a.type === 'calories').reduce((s, a) => s + a.value, 0);
+      const todayWater   = todayActs.filter(a => a.type === 'water').reduce((s, a) => s + a.value, 0);
+
+      const statsData = [
+        { type: 'steps',    val: todaySteps, display: todaySteps.toLocaleString(), cls: '' },
+        { type: 'workout',  val: todayWrk,   display: todayWrk.toString(),         cls: 'workout-card' },
+        { type: 'calories', val: todayCal,   display: todayCal.toLocaleString(),   cls: 'calories-card' },
+        { type: 'water',    val: todayWater, display: todayWater.toString(),        cls: 'water-card' },
+      ];
+
+      document.getElementById('statsGrid').innerHTML = statsData.map(s => {
+        const c = ACTS[s.type];
+        const pct = Math.min(100, c.goal > 0 ? (s.val / c.goal) * 100 : 0);
+        const pts = calcPts(s.type, s.val);
+        return `
+          <div class="stat-card ${s.cls}">
+            <div class="stat-card-top">
+              <div class="stat-card-icon">${ACT_ICONS[s.type]}</div>
+              ${pts > 0 ? `<div class="stat-pts-badge">+${pts} pts</div>` : ''}
+            </div>
+            <div class="stat-val">${s.display}</div>
+            <div class="stat-unit">of ${c.goal.toLocaleString()} ${c.unit}</div>
+            <div class="stat-label">${c.label}</div>
+            <div class="stat-progress">
+              <div class="stat-bar-track"><div class="stat-bar-fill ${s.type}" style="width:${pct}%"></div></div>
+              <div class="stat-goal">${Math.round(pct)}% of goal</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      renderLeaderboardPreview();
+      renderFullLeaderboard();
+      renderMissions();
+      renderFeed();
+      renderProfile();
+    }
+
+    function buildLeaderboard(mode) {
+      const wa = weekAgo();
+      const today = todayKey();
+      const members = clanMembers.length
+        ? clanMembers
+        : [{ user_id: session.user.id, profiles: { display_name: profile?.display_name } }];
+      return members.map(m => {
+        const acts = m.user_id === session.user.id ? allMyActs : clanActivities.filter(a => a.user_id === m.user_id);
+        const total = acts.reduce((s, a) => s + (a.points || 0), 0);
+        const todayPts = acts.filter(a => a.created_at >= todayStart).reduce((s, a) => s + (a.points || 0), 0);
+        const weeklyPts = acts.filter(a => new Date(a.created_at) >= wa).reduce((s, a) => s + (a.points || 0), 0);
+        return {
+          id: m.user_id, name: m.profiles?.display_name || 'Member',
+          total, todayPts, weeklyPts, isMe: m.user_id === session.user.id,
+        };
+      }).sort((a, b) => {
+        if (mode === 'today') return b.todayPts - a.todayPts;
+        if (mode === 'weekly') return b.weeklyPts - a.weeklyPts;
+        return b.total - a.total;
+      });
+    }
+
+    function valForMode(m, mode) {
+      return mode === 'today' ? m.todayPts : mode === 'weekly' ? m.weeklyPts : m.total;
+    }
+
+    function renderLeaderboardPreview() {
+      const sorted = buildLeaderboard('total');
+      if (!sorted.length || (!clanMembers.length && !family)) {
+        document.getElementById('lbPreview').innerHTML = `
+          <div class="no-clan-banner">
+            <strong>You're solo</strong>
+            <p>Create or join a clan in the Android app to compete with others.</p>
+          </div>`;
+        return;
+      }
+      // Podium top 3
+      const top3 = sorted.slice(0, 3);
+      const rest = sorted.slice(3, 8);
+      const maxVal = sorted[0]?.total || 1;
+
+      const podiumOrder = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
+      const podiumClasses = top3.length === 3 ? ['p2', 'p1', 'p3'] : ['p1', 'p2', 'p3'];
+      const medalClasses  = top3.length === 3 ? ['s', 'g', 'b']  : ['g', 's', 'b'];
+      const medals        = ['2', '1', '3'];
+
+      let html = `<div class="podium">`;
+      podiumOrder.forEach((m, i) => {
+        html += `
+          <div class="podium-card ${podiumClasses[i]}">
+            <div class="podium-medal ${medalClasses[i]}">${medals[i]}</div>
+            <div class="podium-avatar">${initials(m.name)}</div>
+            <div class="podium-name">${m.isMe ? escHtml(m.name) + ' (You)' : escHtml(m.name)}</div>
+            <div class="podium-pts">${m.total.toLocaleString()} pts</div>
+          </div>`;
+      });
+      html += `</div>`;
+
+      if (rest.length) {
+        html += `<div class="lb-list">`;
+        rest.forEach((m, i) => {
+          const pct = Math.round((m.total / maxVal) * 100);
+          html += `
+            <div class="lb-item ${m.isMe ? 'is-me' : ''}">
+              <div class="lb-rank">${i + 4}</div>
+              <div class="lb-avatar">${initials(m.name)}</div>
+              <div class="lb-info">
+                <div class="lb-name">${m.isMe ? escHtml(m.name) + ' (You)' : escHtml(m.name)}</div>
+                <div class="lb-bar-wrap"><div class="lb-bar" style="width:${pct}%"></div></div>
+              </div>
+              <div class="lb-pts">${m.total.toLocaleString()}</div>
+            </div>`;
+        });
+        html += `</div>`;
+      }
+      document.getElementById('lbPreview').innerHTML = html;
+    }
+
+    function renderFullLeaderboard() {
+      const sorted = buildLeaderboard(sortMode);
+      if (!sorted.length || (!clanMembers.length && !family)) {
+        document.getElementById('fullLeaderboard').innerHTML = `
+          <div class="no-clan-banner" style="text-align:center;padding:3rem;">
+            <strong>You're solo</strong>
+            <p style="margin-top:0.5rem;">Download the Android app to create or join a clan.</p>
+          </div>`;
+        return;
+      }
+      const maxVal = valForMode(sorted[0], sortMode) || 1;
+      // Podium + list for full view
+      const top3 = sorted.slice(0, 3);
+      const rest = sorted.slice(3);
+      const podiumOrder = top3.length === 3 ? [top3[1], top3[0], top3[2]] : top3;
+      const podiumClasses = top3.length === 3 ? ['p2', 'p1', 'p3'] : ['p1', 'p2', 'p3'];
+      const medalClasses  = top3.length === 3 ? ['s', 'g', 'b']  : ['g', 's', 'b'];
+      const medals        = ['2', '1', '3'];
+
+      let html = `<div class="podium">`;
+      podiumOrder.forEach((m, i) => {
+        const v = valForMode(m, sortMode);
+        html += `
+          <div class="podium-card ${podiumClasses[i]}">
+            <div class="podium-medal ${medalClasses[i]}">${medals[i]}</div>
+            <div class="podium-avatar">${initials(m.name)}</div>
+            <div class="podium-name">${m.isMe ? escHtml(m.name) + ' (You)' : escHtml(m.name)}</div>
+            <div class="podium-pts">${v.toLocaleString()} pts</div>
+          </div>`;
+      });
+      html += `</div>`;
+      if (rest.length) {
+        html += `<div class="lb-list">`;
+        rest.forEach((m, i) => {
+          const v = valForMode(m, sortMode);
+          const pct = Math.round((v / maxVal) * 100);
+          html += `
+            <div class="lb-item ${m.isMe ? 'is-me' : ''}">
+              <div class="lb-rank">${i + 4}</div>
+              <div class="lb-avatar">${initials(m.name)}</div>
+              <div class="lb-info">
+                <div class="lb-name">${m.isMe ? escHtml(m.name) + ' (You)' : escHtml(m.name)}</div>
+                <div class="lb-bar-wrap"><div class="lb-bar" style="width:${pct}%"></div></div>
+              </div>
+              <div class="lb-pts">${v.toLocaleString()}</div>
+            </div>`;
+        });
+        html += `</div>`;
+      }
+      document.getElementById('fullLeaderboard').innerHTML = html;
+    }
+
+    function renderMissions() {
+      if (!missions.length) {
+        document.getElementById('missionsList').innerHTML = `<div class="empty-state"><p>No missions assigned for today.</p></div>`;
+        return;
+      }
+      document.getElementById('missionsList').innerHTML = missions.map(m => `
+        <div class="mission-item ${m.completed ? 'done' : ''}">
+          <div class="mission-check ${m.completed ? 'done' : ''}">
+            ${m.completed ? `<svg viewBox="0 0 24 24" fill="none" stroke="hsl(228,12%,6%)" stroke-width="3" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+          </div>
+          <div class="mission-body">
+            <div class="mission-title">${escHtml(m.title || m.type)}</div>
+            ${m.description ? `<div class="mission-sub">${escHtml(m.description)}</div>` : ''}
+          </div>
+          <div class="mission-pts">+${parseInt(m.points_reward, 10) || 0} pts</div>
+        </div>`).join('');
+    }
+
+    function renderFeed() {
+      if (!allMyActs.length) {
+        document.getElementById('feedList').innerHTML = `
+          <div class="empty-state">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <p>No activities yet — head to Log Activity to get started.</p>
+          </div>`;
+        return;
+      }
+      document.getElementById('feedList').innerHTML =
+        allMyActs.slice(0, 10).map(a => {
+          const c = ACTS[a.type] || { label: a.type, unit: '' };
+          return `
+          <div class="feed-item">
+            <div class="feed-icon-wrap">${ACT_ICONS[a.type] || ACT_ICONS.steps}</div>
+            <div>
+              <div class="feed-label">${escHtml(a.label || c.label)}</div>
+              <div class="feed-sub">${(a.value || 0).toLocaleString()} ${escHtml(c.unit)} · ${fmtTime(a.created_at)}</div>
+            </div>
+            ${(a.points || 0) > 0 ? `<div class="feed-pts">+${parseInt(a.points, 10) || 0}</div>` : ''}
+          </div>`;
+        }).join('');
+    }
+
+    function renderProfile() {
+      const displayName = profile?.display_name || session.user.email?.split('@')[0] || 'User';
+      const email = session.user.email || '';
+      const totalPts = allMyActs.reduce((s, a) => s + (a.points || 0), 0);
+      const avatarColor = getAvatarColor(profile?.avatar_emoji);
+
+      // Large profile avatar
+      const lgAvatar = document.getElementById('profileAvatarLg');
+      lgAvatar.textContent = initials(displayName);
+      lgAvatar.style.background = avatarColor;
+
+      // Build color picker swatches
+      const swatchesEl = document.getElementById('avatarSwatches');
+      swatchesEl.innerHTML = AVATAR_COLORS.map(c => `
+        <div class="avatar-swatch ${c === avatarColor ? 'selected' : ''}"
+             style="background:${c};"
+             data-color="${c}"
+             title="${c}">
+          ${c === avatarColor ? initials(displayName) : ''}
+        </div>`).join('');
+      swatchesEl.querySelectorAll('.avatar-swatch').forEach(sw => {
+        sw.addEventListener('click', async () => {
+          const color = sw.dataset.color;
+          profile.avatar_emoji = color;
+          renderProfile();
+          const avatarC = getAvatarColor(color);
+          applyAvatar(document.getElementById('sidebarAvatar'), displayName, avatarC);
+          applyAvatar(document.getElementById('topAvatar'), displayName, avatarC);
+          await sb.from('profiles').update({ avatar_emoji: color }).eq('id', session.user.id);
+          showToast('Avatar updated!');
+        });
+      });
+
+      document.getElementById('profileName').textContent = displayName;
+      document.getElementById('profileEmail').textContent = email;
+      document.getElementById('profileStat').textContent = `${totalPts.toLocaleString()} total points`;
+      document.getElementById('infoName').textContent = displayName;
+      document.getElementById('infoEmail').textContent = email;
+      document.getElementById('infoSource').textContent = SOURCE_LABELS[profile?.fitness_source] || profile?.fitness_source || '—';
+      document.getElementById('infoJoined').textContent = session.user.created_at
+        ? new Date(session.user.created_at).toLocaleDateString([], { month: 'long', year: 'numeric' })
+        : '—';
+      document.getElementById('infoPoints').textContent = totalPts.toLocaleString() + ' pts';
+      document.getElementById('infoClan').textContent = family?.name || 'No clan — download the app to join';
+    }
+
+
+    // ══════════════════════════════════════════
+    // CONQUEST
+    // ══════════════════════════════════════════
+    let conquestMap = null, conquestLayers = {}, conquestData = {};
+    const CONQUEST_TERRITORIES = [
+      { id:'USA',  name:'United States',      latlng:[38,-97],     region:'North America' },
+      { id:'CAN',  name:'Canada',              latlng:[56,-106],    region:'North America' },
+      { id:'MEX',  name:'Mexico',              latlng:[23.5,-102],  region:'North America' },
+      { id:'BRA',  name:'Brazil',              latlng:[-14,-52],    region:'South America' },
+      { id:'ARG',  name:'Argentina',           latlng:[-34,-64],    region:'South America' },
+      { id:'COL',  name:'Colombia',            latlng:[4,-72],      region:'South America' },
+      { id:'GBR',  name:'United Kingdom',      latlng:[55,-3],      region:'Europe' },
+      { id:'FRA',  name:'France',              latlng:[46.2,2.2],   region:'Europe' },
+      { id:'DEU',  name:'Germany',             latlng:[51.2,10.5],  region:'Europe' },
+      { id:'ESP',  name:'Spain',               latlng:[40.5,-3.7],  region:'Europe' },
+      { id:'ITA',  name:'Italy',               latlng:[41.9,12.6],  region:'Europe' },
+      { id:'POL',  name:'Poland',              latlng:[51.9,19.1],  region:'Europe' },
+      { id:'SWE',  name:'Sweden',              latlng:[60.1,18.6],  region:'Europe' },
+      { id:'RUS',  name:'Russia',              latlng:[61,105],     region:'Europe/Asia' },
+      { id:'CHN',  name:'China',               latlng:[35,103],     region:'Asia' },
+      { id:'JPN',  name:'Japan',               latlng:[36.2,138],   region:'Asia' },
+      { id:'IND',  name:'India',               latlng:[20,77],      region:'Asia' },
+      { id:'KOR',  name:'South Korea',         latlng:[36.5,127.8], region:'Asia' },
+      { id:'IDN',  name:'Indonesia',           latlng:[-2.5,118],   region:'Asia' },
+      { id:'AUS',  name:'Australia',           latlng:[-25,133],    region:'Oceania' },
+      { id:'NGA',  name:'Nigeria',             latlng:[9.1,8.7],    region:'Africa' },
+      { id:'ZAF',  name:'South Africa',        latlng:[-30,25],     region:'Africa' },
+      { id:'EGY',  name:'Egypt',               latlng:[26,30],      region:'Africa' },
+      { id:'ETH',  name:'Ethiopia',            latlng:[9,38.5],     region:'Africa' },
+      { id:'SAU',  name:'Saudi Arabia',        latlng:[24,45],      region:'Middle East' },
+      { id:'TUR',  name:'Turkey',              latlng:[39,35],      region:'Middle East' },
+    ];
+
+    const CQ_MY_COLOR   = '#00E5A0';
+    const CQ_ENE_COLOR  = '#60A5FA';
+    const CQ_NEU_COLOR  = 'hsl(228,8%,28%)';
+    const CQ_HOVER_COLOR = '#F97316';
+
+    async function initConquest() {
+      if (conquestMap) return; // already initialised
+
+      // Load territory ownership from Supabase
+      const { data: tcData, error: tcErr } = await sb.from('territory_control').select('*');
+      if (tcErr && tcErr.code === '42P01') {
+        // Table doesn't exist yet
+        document.getElementById('conquestSetupBanner').style.display = 'block';
+      }
+      (tcData || []).forEach(row => { conquestData[row.territory_id] = row; });
+
+      document.getElementById('conquestStats').style.display = 'grid';
+      updateConquestStats();
+
+      conquestMap = L.map('conquest-map', {
+        center: [20, 0], zoom: 2,
+        minZoom: 2, maxZoom: 5,
+        worldCopyJump: true,
+        scrollWheelZoom: false,
+        zoomControl: true,
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+        attribution: '&copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19,
+      }).addTo(conquestMap);
+
+      // Render territory markers
+      CONQUEST_TERRITORIES.forEach(t => {
+        const owned = conquestData[t.id];
+        const myClanId = family?.id;
+        const isMine = owned && owned.clan_id === myClanId;
+        const isEnemy = owned && !isMine;
+        const color = isMine ? CQ_MY_COLOR : isEnemy ? CQ_ENE_COLOR : CQ_NEU_COLOR;
+
+        const marker = L.circleMarker(t.latlng, {
+          radius: 14,
+          fillColor: color,
+          color: 'transparent',
+          fillOpacity: 0.82,
+          weight: 0,
+        });
+
+        const label = L.divIcon({
+          className: '',
+          html: `<div style="
+            font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:9px;
+            color:hsl(228,12%,6%);text-align:center;line-height:1.1;
+            width:28px;margin-left:-14px;margin-top:-6px;pointer-events:none;
+          ">${t.id}</div>`,
+          iconSize: [0, 0],
+        });
+        L.marker(t.latlng, { icon: label }).addTo(conquestMap);
+        marker.addTo(conquestMap);
+        conquestLayers[t.id] = marker;
+
+        marker.on('mouseover', () => {
+          if (marker.options.fillColor !== CQ_MY_COLOR)
+            marker.setStyle({ fillColor: CQ_HOVER_COLOR });
+        });
+        marker.on('mouseout', () => {
+          const o = conquestData[t.id];
+          const mine = o && o.clan_id === family?.id;
+          marker.setStyle({ fillColor: mine ? CQ_MY_COLOR : o ? CQ_ENE_COLOR : CQ_NEU_COLOR });
+        });
+        marker.on('click', () => showTerritoryPanel(t));
+      });
+    }
+
+    function updateConquestStats() {
+      const myClanId = family?.id;
+      const mine = Object.values(conquestData).filter(r => r.clan_id === myClanId).length;
+      const total = Object.keys(conquestData).length;
+      document.getElementById('cqMine').textContent = mine;
+      document.getElementById('cqTotal').textContent = total;
+    }
+
+    function showTerritoryPanel(t) {
+      const owned = conquestData[t.id];
+      const myClanId = family?.id;
+      const isMine = owned && owned.clan_id === myClanId;
+      const isEnemy = owned && !isMine;
+
+      let html = `
+        <div class="conquest-territory-name">${escHtml(t.name)}</div>
+        <div class="conquest-owner-row">Region: <span>${escHtml(t.region)}</span></div>
+        <div class="conquest-owner-row">Owner: <span>${
+          isMine ? escHtml(family?.name || 'Your clan')
+          : isEnemy ? escHtml(owned.clan_name || 'Enemy clan')
+          : 'Unclaimed'
+        }</span></div>`;
+
+      if (isMine) {
+        html += `<div class="conquest-status-mine">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Controlled by your clan
+        </div>`;
+      } else {
+        const cost = isEnemy ? 50 : 25;
+        html += `
+          <button class="btn-attack" id="attackBtn" data-tid="${t.id}" data-tname="${t.name}" data-cost="${cost}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+            Attack (+${cost} pts)
+          </button>
+          <div class="conquest-hint">${
+            isEnemy
+              ? 'Capture from enemy clan — earns 50 pts'
+              : 'Claim unclaimed territory — earns 25 pts'
+          }</div>`;
+      }
+      document.getElementById('conquestPanelBody').innerHTML = html;
+
+      const attackBtn = document.getElementById('attackBtn');
+      if (attackBtn) {
+        attackBtn.addEventListener('click', () => doAttack(t, parseInt(attackBtn.dataset.cost)));
+      }
+    }
+
+    async function doAttack(t, pts) {
+      if (!family) {
+        showToast('Join a clan first to conquer territory', 'err');
+        return;
+      }
+      const btn = document.getElementById('attackBtn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner-sm" style="border-top-color:white;"></div>'; }
+
+      // Upsert territory ownership
+      const { error: upsertErr } = await sb.from('territory_control').upsert({
+        territory_id: t.id,
+        clan_id: family.id,
+        clan_name: family.name,
+        captured_by: session.user.id,
+        captured_at: new Date().toISOString(),
+      }, { onConflict: 'territory_id' });
+
+      if (upsertErr) {
+        showToast('Attack failed: ' + upsertErr.message, 'err');
+        if (btn) { btn.disabled = false; btn.textContent = 'Attack'; }
+        return;
+      }
+
+      // Log as activity to award pts
+      await sb.from('activities').insert({
+        user_id: session.user.id,
+        type: 'conquest',
+        value: 1,
+        points: pts,
+        label: `Captured ${t.name}`,
+      });
+
+      // Update local state
+      conquestData[t.id] = { territory_id: t.id, clan_id: family.id, clan_name: family.name };
+      const layer = conquestLayers[t.id];
+      if (layer) layer.setStyle({ fillColor: CQ_MY_COLOR });
+      updateConquestStats();
+      showTerritoryPanel(t);
+
+      // Refresh activity feed
+      const { data: newActs } = await sb.from('activities')
+        .select('*').eq('user_id', session.user.id)
+        .order('created_at', { ascending: false }).limit(100);
+      allMyActs = newActs || [];
+      renderUI();
+      showToast(`${t.name} captured! +${pts} pts`);
+    }
+
+    // Init conquest map when tab is opened
+    const origSwitchTab = window.switchTab;
+    window.switchTab = function(name) {
+      origSwitchTab(name);
+      if (name === 'conquest') setTimeout(initConquest, 50);
+    };
+
+    // Sign out (both buttons)
+    async function doSignOut() {
+      await sb.auth.signOut();
+      window.location.href = 'login.html';
+    }
+    document.getElementById('signOutBtn').addEventListener('click', doSignOut);
+    document.getElementById('signOutBtnSidebar').addEventListener('click', doSignOut);
+
+    // Delete account
+    document.getElementById('openDeleteBtn').addEventListener('click', () => {
+      document.getElementById('deleteModal').classList.add('open');
+      document.getElementById('deleteConfirmInput').value = '';
+      document.getElementById('confirmDeleteBtn').disabled = true;
+    });
+    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+      document.getElementById('deleteModal').classList.remove('open');
+    });
+    document.getElementById('deleteConfirmInput').addEventListener('input', e => {
+      document.getElementById('confirmDeleteBtn').disabled = e.target.value !== 'DELETE';
+    });
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+      document.getElementById('confirmDeleteBtn').disabled = true;
+      document.getElementById('confirmDeleteBtn').innerHTML = '<div class="spinner-sm"></div>';
+      try {
+        const { error } = await sb.functions.invoke('delete-account');
+        if (error) throw error;
+        await sb.auth.signOut();
+        window.location.href = 'index.html?deleted=1';
+      } catch (e) {
+        showToast('Delete failed: ' + e.message, 'err');
+        document.getElementById('confirmDeleteBtn').disabled = false;
+        document.getElementById('confirmDeleteBtn').textContent = 'Delete forever';
+      }
+    });
+
+  })();
+  </script>
+</body>
+</html>

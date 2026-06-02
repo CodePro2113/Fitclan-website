@@ -45,7 +45,11 @@
 html { scroll-behavior: auto; }
 body {
   font-family: var(--font-body);
-  background: var(--bg);
+  /* Deep blue-charcoal base — richer than flat black, makes orbs glow beautifully */
+  background-color: hsl(228, 12%, 6%);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 72% -5%, hsl(228, 18%, 11%) 0%, transparent 50%),
+    radial-gradient(ellipse 75% 50% at  8% 105%, hsl(220, 20%, 9%)  0%, transparent 50%);
   color: var(--text);
   overflow-x: hidden;
   line-height: 1.6;
@@ -88,18 +92,57 @@ ul { list-style: none; }
 .cursor-follower.hover { width: 56px; height: 56px; border-color: hsl(0,100%,71%,0.5); }
 
 /* ============================================
-   AMBIENT ORBS — teal/coral palette
+   AMBIENT ORBS — premium, 160px blur
    ============================================ */
-/* Gradient mesh orbs — large, soft, slow-drifting wash across the whole page.
-   Deep charcoal base (body) + three premium teal / blue / violet orbs. */
-.ambient-orb { position: fixed; border-radius: 50%; filter: blur(150px); pointer-events: none; z-index: 0; will-change: transform; }
-.orb-1 { width: 760px; height: 760px; background: radial-gradient(circle, hsl(159,93%,50%,0.13) 0%, transparent 70%); top: -240px; right: -140px; animation: orbFloat 30s ease-in-out infinite; }
-.orb-2 { width: 640px; height: 640px; background: radial-gradient(circle, hsl(217,91%,60%,0.12) 0%, transparent 70%); bottom: 8%;   left: -180px; animation: orbFloat 26s ease-in-out infinite -9s; }
-.orb-3 { width: 480px; height: 480px; background: radial-gradient(circle, hsl(265,85%,62%,0.07) 0%, transparent 70%); top: 42%;    left: 44%;   animation: orbFloat 34s ease-in-out infinite -17s; }
-@keyframes orbFloat {
-  0%,100% { transform: translate3d(0,0,0) scale(1); }
-  33%     { transform: translate3d(40px,-56px,0) scale(1.07); }
-  66%     { transform: translate3d(-32px,40px,0) scale(0.93); }
+/* Three orbs: teal (brand), blue (brand), warm amber (accent).
+   160px blur gives a soft, diffuse, high-end glow.
+   Sizes and opacity compensate so colour is clearly visible. */
+.ambient-orb {
+  position: fixed; border-radius: 50%;
+  pointer-events: none; z-index: 0; will-change: transform;
+  filter: blur(160px);
+}
+
+/* ① Teal — bleeds in from top-right */
+.orb-1 {
+  width: 1300px; height: 1300px;
+  background: radial-gradient(circle at 38% 38%,
+    hsl(162, 88%, 48%, 0.72) 0%,
+    hsl(162, 88%, 48%, 0.28) 40%,
+    transparent 68%);
+  top: -460px; right: -280px;
+  animation: orbBreath 26s ease-in-out infinite;
+}
+
+/* ② Deep blue — bleeds in from bottom-left */
+.orb-2 {
+  width: 1150px; height: 1150px;
+  background: radial-gradient(circle at 55% 55%,
+    hsl(222, 82%, 58%, 0.65) 0%,
+    hsl(222, 82%, 58%, 0.22) 42%,
+    transparent 68%);
+  bottom: -380px; left: -300px;
+  animation: orbBreath 22s ease-in-out infinite -9s;
+}
+
+/* ③ Warm amber — subtle lower-right accent for depth */
+.orb-4 {
+  width: 900px; height: 900px;
+  background: radial-gradient(circle at 50% 50%,
+    hsl(28, 90%, 55%, 0.38) 0%,
+    hsl(28, 90%, 55%, 0.10) 48%,
+    transparent 68%);
+  bottom: -200px; right: -180px;
+  animation: orbBreath 30s ease-in-out infinite -5s;
+}
+
+/* orb-3 removed (was violet) */
+.orb-3 { display: none; }
+
+@keyframes orbBreath {
+  0%,100% { transform: translate3d(0, 0, 0)   scale(1);    opacity: 1;    }
+  40%     { transform: translate3d(-40px,-60px,0) scale(1.07); opacity: 0.85; }
+  70%     { transform: translate3d(50px, 35px,0)  scale(0.95); opacity: 0.92; }
 }
 
 /* ============================================
@@ -146,33 +189,8 @@ ul { list-style: none; }
    HERO
    ============================================ */
 .hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; padding: 120px 32px 80px; }
-/* Soft mesh wash focused behind the headline — no rotation, just a slow
-   breathe. Pairs with the drifting ambient orbs for depth without busyness. */
-.hero-bg-gradient {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  will-change: transform, opacity;
-  background:
-    radial-gradient(55% 60% at 30% 38%, hsl(159, 93%, 50%, 0.14) 0%, transparent 60%),
-    radial-gradient(50% 55% at 70% 64%, hsl(217, 91%, 60%, 0.12) 0%, transparent 62%);
-  filter: blur(64px);
-  animation: heroGlow 24s ease-in-out infinite;
-}
-@keyframes heroGlow {
-  0%,100% { transform: scale(1)    translateY(0);     opacity: 0.85; }
-  50%     { transform: scale(1.05) translateY(-1.5%); opacity: 1;    }
-}
-
-/* Premium vignette — gently darkens the edges toward the charcoal base
-   so the hero content sits in a soft pool of light. */
-.hero::before {
-  content: '';
-  position: absolute; inset: 0; z-index: 3;
-  background: radial-gradient(125% 125% at 50% 32%, transparent 55%, hsl(240,3%,7%,0.6) 100%);
-  pointer-events: none;
-}
+/* hero-bg-gradient removed — ambient orbs handle all background color */
+.hero-bg-gradient { display: none; }
 
 .hero-content { position: relative; z-index: 10; max-width: 580px; flex: 0 0 auto; margin-left: max(32px, calc((100vw - 1200px) / 2)); }
 
@@ -392,7 +410,16 @@ ul { list-style: none; }
 @keyframes todayPulse { 0%,100% { box-shadow: 0 0 0 0 hsl(0,100%,71%,0.4); } 50% { box-shadow: 0 0 0 6px transparent; } }
 
 /* Conquest hexagons */
-.conquest-visual { position: relative; height: 120px; margin-top: 20px; background: hsl(240,3%,9%); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+.conquest-visual { position: relative; height: 260px; margin-top: 20px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); }
+#conquest-map { width: 100%; height: 100%; cursor: grab; }
+#conquest-map:active { cursor: grabbing; }
+/* Override Leaflet defaults to match dark theme */
+#conquest-map .leaflet-container { background: hsl(220,30%,8%); }
+/* Tooltip */
+.cq-tip-wrap { background: none !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+.cq-tip-wrap .leaflet-tooltip-top::before { display: none; }
+.cq-tip { background: hsl(228,18%,12%,0.95); border: 1px solid hsl(159,93%,50%,0.25); border-radius: 8px; padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 11px; color: hsl(0,0%,92%); white-space: nowrap; backdrop-filter: blur(8px); }
+.cq-meta { color: hsl(0,0%,55%); font-size: 10px; margin-top: 2px; }
 .territory { position: absolute; font-size: 2.2rem; color: var(--c); text-shadow: 0 0 20px var(--c); animation: hexPulse 3s ease-in-out infinite; filter: drop-shadow(0 0 8px var(--c)); }
 @keyframes hexPulse { 0%,100% { transform:scale(1); opacity:.8; } 50% { transform:scale(1.12); opacity:1; } }
 
@@ -522,11 +549,9 @@ ul { list-style: none; }
   justify-content: center;
   align-items: flex-end;
   gap: 28px;
-  padding: 0 0 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  padding: 40px 16px 8px;
+  overflow: visible;
 }
-.showcase-phones-wrap::-webkit-scrollbar { display: none; }
 
 /* Individual phone item */
 .sc-phone-item {
@@ -1207,7 +1232,6 @@ body::after {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .hero-bg-gradient { animation: none; }
   .ambient-orb { animation: none; }
   .cursor, .cursor-follower { display: none; }
   body { cursor: auto; }

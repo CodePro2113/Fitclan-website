@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign up — FitClan</title>
+  <meta name="description" content="Create your FitClan account and start competing with your crew." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal: hsl(159, 93%, 50%);
+      --blue: hsl(217, 91%, 60%);
+      --bg:   hsl(240, 3%, 7%);
+      --bg2:  hsl(240, 3%, 10%);
+      --bg3:  hsl(240, 3%, 13%);
+      --text: hsl(0, 0%, 96%);
+      --muted: hsl(0, 0%, 55%);
+      --border: hsl(240, 3%, 20%);
+      --font-head: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+    html, body { min-height: 100vh; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      display: flex; flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .orb {
+      position: fixed; border-radius: 50%;
+      pointer-events: none; z-index: 0;
+    }
+    .orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, hsl(159,93%,50%,0.22) 0%, transparent 65%);
+      top: -280px; right: -180px; filter: blur(110px);
+      animation: orbDrift 28s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 560px; height: 560px;
+      background: radial-gradient(circle, hsl(217,91%,60%,0.18) 0%, transparent 65%);
+      bottom: -160px; left: -160px; filter: blur(110px);
+      animation: orbDrift 22s ease-in-out infinite -8s;
+    }
+    @keyframes orbDrift {
+      0%,100% { transform: translate3d(0,0,0) scale(1); }
+      50%     { transform: translate3d(30px,-40px,0) scale(1.06); }
+    }
+    @media (prefers-reduced-motion: reduce) { .orb { animation: none; } }
+
+    nav {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { display: flex; align-items: center; gap: 0.55rem; }
+    .logo-text {
+      font-family: var(--font-head); font-weight: 700; font-size: 1.15rem;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-right { font-size: 0.85rem; color: var(--muted); }
+    .nav-right a { color: var(--teal); font-weight: 600; margin-left: 4px; }
+    .nav-right a:hover { text-decoration: underline; }
+
+    .page {
+      flex: 1; display: flex; align-items: flex-start; justify-content: center;
+      padding: 2.5rem 1.25rem;
+      position: relative; z-index: 2;
+    }
+    .card {
+      width: 100%; max-width: 480px;
+      background: hsl(240,3%,10%,0.7);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      backdrop-filter: blur(20px);
+    }
+    .card-title {
+      font-family: var(--font-head);
+      font-size: 1.75rem; font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .card-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+    .field { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; color: var(--muted);
+      pointer-events: none; transition: color .2s; z-index: 1;
+    }
+    .input-wrap:focus-within .input-icon { color: var(--teal); }
+    input[type="email"], input[type="password"], input[type="text"] {
+      width: 100%; padding: 0.875rem 1rem 0.875rem 2.75rem;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 14px; color: var(--text); font-size: 0.95rem;
+      font-family: var(--font-body); outline: none; transition: border-color .2s;
+    }
+    input:focus { border-color: var(--teal); }
+    .toggle-pw {
+      position: absolute; right: 14px;
+      background: none; border: none; cursor: pointer; padding: 2px;
+      color: var(--muted); transition: color .2s;
+    }
+    .toggle-pw:hover { color: var(--text); }
+
+    /* Fitness source */
+    .source-block {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .source-hint {
+      font-size: 0.8rem; color: var(--muted);
+      margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 6px;
+    }
+    .source-hint svg { flex-shrink: 0; margin-top: 1px; }
+    .pills { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .pill {
+      padding: 0.6rem 0.75rem; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg2);
+      color: var(--text); font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: all .15s; text-align: center;
+    }
+    .pill:hover { border-color: hsl(159,93%,50%,0.5); }
+    .pill.active {
+      background: linear-gradient(135deg, var(--teal), hsl(170,90%,40%));
+      color: hsl(240,3%,7%); border-color: transparent;
+      box-shadow: 0 0 12px hsl(159,93%,50%,0.3);
+    }
+
+    .error-msg {
+      background: hsl(0,72%,60%,0.1); border: 1px solid hsl(0,72%,60%,0.3);
+      color: hsl(0,72%,70%); border-radius: 10px;
+      padding: 0.75rem 1rem; font-size: 0.85rem;
+      margin-bottom: 1rem; display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.9rem 1.5rem;
+      background: linear-gradient(135deg, var(--teal), hsl(170,90%,40%));
+      color: hsl(240,3%,7%); font-family: var(--font-head);
+      font-weight: 700; font-size: 0.95rem;
+      border: none; border-radius: 50px; cursor: pointer;
+      box-shadow: 0 0 24px hsl(159,93%,50%,0.3);
+      transition: opacity .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .terms-note {
+      font-size: 0.75rem; color: var(--muted);
+      text-align: center; margin-top: 1rem; line-height: 1.6;
+    }
+    .terms-note a { color: var(--teal); }
+    .terms-note a:hover { text-decoration: underline; }
+
+    .divider { text-align: center; color: var(--muted); font-size: 0.8rem; margin: 1.25rem 0; }
+    .login-link { text-align: center; color: var(--muted); font-size: 0.9rem; }
+    .login-link a { color: var(--teal); font-weight: 600; }
+    .login-link a:hover { text-decoration: underline; }
+
+    /* ── Success / OTP state ── */
+    .success-screen {
+      display: none; text-align: center; padding: 1rem 0;
+    }
+    .success-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: hsl(159,93%,50%,0.12);
+      border: 1px solid hsl(159,93%,50%,0.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .success-title {
+      font-family: var(--font-head); font-size: 1.5rem; font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .success-sub {
+      color: var(--muted); font-size: 0.9rem; line-height: 1.6;
+      max-width: 340px; margin: 0 auto 1.5rem;
+    }
+    .email-highlight { color: var(--teal); font-weight: 600; }
+
+    /* OTP boxes */
+    .otp-wrap {
+      display: flex; gap: 0.4rem; justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+    /* Use input.otp-box to beat the input[type="text"] specificity */
+    input.otp-box {
+      width: 44px; height: 56px;
+      padding: 0;                    /* override the icon-padding rule */
+      background: var(--bg3); border: 1.5px solid var(--border);
+      border-radius: 12px; color: var(--text);
+      font-family: var(--font-head); font-size: 1.4rem; font-weight: 700;
+      text-align: center; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      -moz-appearance: textfield;
+    }
+    input.otp-box::-webkit-outer-spin-button,
+    input.otp-box::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input.otp-box:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px hsl(159,93%,50%,0.15);
+    }
+    input.otp-box.error {
+      border-color: hsl(0,72%,60%);
+      box-shadow: 0 0 0 3px hsl(0,72%,60%,0.15);
+    }
+    input.otp-box.filled { border-color: hsl(159,93%,50%,0.5); }
+    .otp-error {
+      background: hsl(0,72%,60%,0.1); border: 1px solid hsl(0,72%,60%,0.3);
+      color: hsl(0,72%,70%); border-radius: 10px;
+      padding: 0.6rem 1rem; font-size: 0.82rem;
+      margin-bottom: 1rem; display: none;
+    }
+    .otp-error.show { display: block; }
+
+    .spinner {
+      width: 18px; height: 18px; border: 2px solid hsl(240,3%,7%,0.3);
+      border-top-color: hsl(240,3%,7%); border-radius: 50%;
+      animation: spin .7s linear infinite; display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <nav>
+    <a href="index.html" class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="hsl(159,93%,50%)"/>
+            <stop offset="100%" stop-color="hsl(217,91%,60%)"/>
+          </linearGradient>
+        </defs>
+        <path d="M12 2C12 2 7 7 7 12.5a5 5 0 0010 0C17 7 12 2 12 2z" fill="url(#g1)" opacity=".9"/>
+        <path d="M12 8c0 0-2.5 3-2.5 4.5a2.5 2.5 0 005 0C14.5 11 12 8 12 8z" fill="white" opacity=".7"/>
+      </svg>
+      <span class="logo-text">FitClan</span>
+    </a>
+    <div class="nav-right">
+      Already have an account? <a href="login.html">Log in</a>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="card">
+
+      <!-- Sign-up form -->
+      <div id="signupView">
+        <h1 class="card-title">Join FitClan</h1>
+        <p class="card-sub">Compete with your crew on a live leaderboard</p>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <form id="signupForm">
+          <div class="field">
+            <label for="name">Username</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+              <input type="text" id="name" placeholder="Choose a username" maxlength="30" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <div class="input-wrap">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+              <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap" style="position:relative;">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input type="password" id="password" placeholder="Min. 8 characters" autocomplete="new-password" required style="padding-right:2.75rem;" />
+              <button type="button" class="toggle-pw" id="togglePw" aria-label="Show password">
+                <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Fitness source -->
+          <div class="source-block">
+            <div class="source-hint">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" color="hsl(159,93%,50%)">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              Which fitness app do you use? We'll sync your data automatically.
+            </div>
+            <div class="pills" id="pills">
+              <button type="button" class="pill" data-val="samsung_health">Samsung Health</button>
+              <button type="button" class="pill" data-val="google_fit">Google Fit</button>
+              <button type="button" class="pill" data-val="fitbit">Fitbit</button>
+              <button type="button" class="pill" data-val="apple_health">Apple Health</button>
+              <button type="button" class="pill" data-val="other">Other</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" id="submitBtn">
+            <span id="btnText">Create account</span>
+          </button>
+
+          <p class="terms-note">
+            By creating an account you agree to our
+            <a href="terms.html">Terms of Service</a> and
+            <a href="privacy.html">Privacy Policy</a>.
+          </p>
+        </form>
+
+        <div class="divider">──────────────────</div>
+        <div class="login-link">
+          Already have an account? <a href="login.html">Log in</a>
+        </div>
+      </div>
+
+      <!-- OTP verification state -->
+      <div class="success-screen" id="successView">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="hsl(159,93%,50%)" stroke-width="2.5" width="32" height="32">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+        </div>
+        <h2 class="success-title">Enter your code</h2>
+        <p class="success-sub">
+          We sent an 8-digit code to<br>
+          <span class="email-highlight" id="confirmedEmail"></span>
+        </p>
+
+        <div class="otp-error" id="otpError"></div>
+
+        <div class="otp-wrap" id="otpWrap">
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+          <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off" />
+        </div>
+
+        <button class="btn-primary" id="verifyBtn" style="margin-bottom:1.25rem;">
+          <span id="verifyBtnText">Verify code</span>
+        </button>
+
+        <p style="font-size:0.8rem;color:var(--muted);">
+          Didn't get it? Check spam or
+          <button id="resendBtn" style="background:none;border:none;color:var(--teal);font-weight:600;cursor:pointer;font-size:0.8rem;">resend the code</button>.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://cujbjttoofjytezdwkyr.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_QFvM6cyt5vxcleN7M9_oAw_VVaz0bta';
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Fitness source pills
+    let fitnessSource = '';
+    document.getElementById('pills').addEventListener('click', (e) => {
+      const pill = e.target.closest('.pill');
+      if (!pill) return;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      fitnessSource = pill.dataset.val;
+    });
+
+    // Toggle password visibility
+    const pwInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    document.getElementById('togglePw').addEventListener('click', () => {
+      const isText = pwInput.type === 'text';
+      pwInput.type = isText ? 'password' : 'text';
+      eyeIcon.innerHTML = isText
+        ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+        : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    });
+
+    // Form
+    const form = document.getElementById('signupForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    let submittedEmail = '';
+
+    function setLoading(v) {
+      submitBtn.disabled = v;
+      btnText.innerHTML = v ? '<div class="spinner"></div>' : 'Create account';
+    }
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('show');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.remove('show');
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!name) { showError('Please choose a username'); return; }
+      if (!email) { showError('Please enter your email'); return; }
+      if (password.length < 8) { showError('Password must be at least 8 characters'); return; }
+      if (!fitnessSource) { showError('Please select which fitness app you use'); return; }
+
+      setLoading(true);
+      const redirectTo = 'https://fitclan.ca/dashboard.html';
+
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { display_name: name },
+          emailRedirectTo: redirectTo,
+        },
+      });
+      setLoading(false);
+
+      if (error) {
+        const lower = (error.message || '').toLowerCase();
+        if (lower.includes('confirmation email') || lower.includes('sending') || lower.includes('smtp') || lower.includes('email rate')) {
+          showError("We couldn't send the confirmation email right now — our email service is rate-limited. Wait a minute and try again, or contact support@fitclan.ca.");
+        } else if (lower.includes('already registered') || lower.includes('already exists')) {
+          showError('An account with this email already exists. Try logging in instead.');
+        } else if (lower.includes('password')) {
+          showError(error.message);
+        } else if (lower.includes('valid email') || lower.includes('invalid email')) {
+          showError('Please enter a valid email address.');
+        } else {
+          showError(error.message || 'Something went wrong. Please try again.');
+        }
+        return;
+      }
+
+      // Store pending profile data to apply after email verification
+      if (data.user?.id) {
+        localStorage.setItem('fitclan_pending_profile', JSON.stringify({
+          fitness_source: fitnessSource,
+          user_id: data.user.id,
+        }));
+      }
+
+      // Show OTP state
+      submittedEmail = email;
+      document.getElementById('confirmedEmail').textContent = email;
+      document.getElementById('signupView').style.display = 'none';
+      document.getElementById('successView').style.display = 'block';
+      setTimeout(focusOtp, 50);
+    });
+
+    // ── OTP verification ──
+    const otpBoxes = [...document.querySelectorAll('.otp-box')];
+    const otpError = document.getElementById('otpError');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const verifyBtnText = document.getElementById('verifyBtnText');
+
+    function setVerifyLoading(v) {
+      verifyBtn.disabled = v;
+      verifyBtnText.innerHTML = v ? '<div class="spinner"></div>' : 'Verify code';
+    }
+    function clearOtpError() {
+      otpError.classList.remove('show');
+      otpBoxes.forEach(b => b.classList.remove('error'));
+    }
+    function showOtpError(msg) {
+      otpError.textContent = msg;
+      otpError.classList.add('show');
+      otpBoxes.forEach(b => { b.value = ''; b.classList.add('error'); b.classList.remove('filled'); });
+      otpBoxes[0].focus();
+    }
+
+    otpBoxes.forEach((box, i) => {
+      box.addEventListener('input', (e) => {
+        clearOtpError();
+        // keep only last digit, strip non-numeric
+        const digit = e.target.value.replace(/[^0-9]/g, '').slice(-1);
+        e.target.value = digit;
+        if (digit) {
+          box.classList.add('filled');
+          if (i < 7) otpBoxes[i + 1].focus();
+          // auto-submit when all 8 filled
+          if (otpBoxes.every(b => b.value)) attemptVerify();
+        } else {
+          box.classList.remove('filled');
+        }
+      });
+
+      box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace') {
+          clearOtpError();
+          if (!box.value && i > 0) {
+            otpBoxes[i - 1].value = '';
+            otpBoxes[i - 1].classList.remove('filled');
+            otpBoxes[i - 1].focus();
+          }
+        }
+        if (e.key === 'ArrowLeft' && i > 0) otpBoxes[i - 1].focus();
+        if (e.key === 'ArrowRight' && i < 7) otpBoxes[i + 1].focus();
+      });
+
+      // Handle paste of full 6-digit code on any box
+      box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        clearOtpError();
+        const text = (e.clipboardData || window.clipboardData)
+          .getData('text').replace(/[^0-9]/g, '').slice(0, 8);
+        otpBoxes.forEach((b, idx) => {
+          b.value = text[idx] || '';
+          b.classList.toggle('filled', !!text[idx]);
+        });
+        const nextEmpty = otpBoxes.findIndex(b => !b.value);
+        (nextEmpty === -1 ? otpBoxes[7] : otpBoxes[nextEmpty]).focus();
+        if (text.length === 8) attemptVerify();
+      });
+    });
+
+    async function attemptVerify() {
+      const token = otpBoxes.map(b => b.value).join('');
+      if (token.length < 8) return;
+      clearOtpError();
+      setVerifyLoading(true);
+
+      const { error } = await sb.auth.verifyOtp({
+        email: submittedEmail,
+        token,
+        type: 'signup',
+      });
+      setVerifyLoading(false);
+
+      if (error) {
+        const msg = (error.message || '').toLowerCase();
+        if (msg.includes('expired')) {
+          showOtpError('Code expired. Request a new one below.');
+        } else if (msg.includes('invalid') || msg.includes('incorrect')) {
+          showOtpError('Incorrect code. Please try again.');
+        } else {
+          showOtpError('Verification failed. Try again or resend the code.');
+        }
+        return;
+      }
+
+      // Verified — go to dashboard
+      window.location.href = 'dashboard.html';
+    }
+
+    verifyBtn.addEventListener('click', attemptVerify);
+
+    // Focus first box when OTP view appears
+    function focusOtp() { otpBoxes[0].focus(); }
+
+    // Resend code
+    document.getElementById('resendBtn').addEventListener('click', async () => {
+      if (!submittedEmail) return;
+      const btn = document.getElementById('resendBtn');
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+      const { error } = await sb.auth.resend({
+        type: 'signup',
+        email: submittedEmail,
+        options: { emailRedirectTo: 'https://fitclan.ca/dashboard.html' },
+      });
+      if (error) {
+        btn.textContent = 'Failed — try again';
+        btn.disabled = false;
+      } else {
+        btn.textContent = 'Sent!';
+        otpBoxes.forEach(b => { b.value = ''; b.classList.remove('filled', 'error'); });
+        clearOtpError();
+        otpBoxes[0].focus();
+        setTimeout(() => {
+          btn.textContent = 'resend the code';
+          btn.disabled = false;
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+</html>

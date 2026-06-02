@@ -576,22 +576,7 @@
     y: 22,
   });
 
-  /* ============================================
-     FOOTER LOGO GLITCH
-  ============================================ */
-  const footerLogoText = document.querySelector('.footer-logo .logo-text');
-  if (footerLogoText) {
-    footerLogoText.addEventListener('mouseenter', () => {
-      const orig = footerLogoText.textContent;
-      const chars = 'FITFAM0123@#$%';
-      let i = 0;
-      const iv = setInterval(() => {
-        footerLogoText.textContent = orig.split('').map((c, j) => j < i ? c : chars[Math.floor(Math.random()*chars.length)]).join('');
-        i++;
-        if (i > orig.length) { footerLogoText.textContent = orig; clearInterval(iv); }
-      }, 35);
-    });
-  }
+  /* Footer logo glitch removed */
 
   /* ============================================
      ELECTRIC SPARK ON SECTION ENTRY
@@ -977,10 +962,192 @@
       gsap.fromTo('.footer-top > *',
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, stagger: .12, duration: .7, ease: 'power3.out' });
-      gsap.fromTo('.social-btn',
-        { scale: 0, opacity: 0 },
-        { scale: 1, opacity: 1, stagger: .07, duration: .5, delay: .3, ease: 'back.out(2)' });
     },
+  });
+
+  /* ============================================
+     ═══ PREMIUM POLISH LAYER ═══
+     Refined micro-interactions that elevate
+     the existing animation system.
+  ============================================ */
+
+  /* ── Nav glass intensifies on scroll ── */
+  ScrollTrigger.create({
+    trigger: 'body', start: 'top top', end: '+=300', scrub: 1,
+    onUpdate: (self) => {
+      if (!nav) return;
+      const p = self.progress;
+      nav.style.backdropFilter = `blur(${12 + p * 18}px)`;
+      nav.style.background = `hsl(240, 3%, 7%, ${0.5 + p * 0.35})`;
+    },
+  });
+
+  /* ── Hero phone idle float — premium subtle breathing ── */
+  gsap.to('.hero-phone-wrap', {
+    y: -14,
+    duration: 4.5,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1,
+  });
+
+  /* ── Hero badge dot — premium pulse ── */
+  gsap.to('.hero-badge .badge-dot', {
+    scale: 1.4,
+    opacity: 0.65,
+    duration: 1.2,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1,
+  });
+
+  /* ── Scroll-velocity-driven section title skew ── */
+  let scrollVelocity = 0;
+  let lastScrollY = 0;
+  let velTicker = null;
+  function trackVelocity() {
+    const cur = window.scrollY;
+    scrollVelocity = cur - lastScrollY;
+    lastScrollY = cur;
+    const titles = document.querySelectorAll('.section-title');
+    titles.forEach(t => {
+      const clamped = Math.max(-15, Math.min(15, scrollVelocity * 0.3));
+      t.style.transform = `skewY(${clamped * 0.15}deg)`;
+    });
+  }
+  if (!prefersReducedMotion) {
+    window.addEventListener('scroll', () => {
+      if (velTicker) cancelAnimationFrame(velTicker);
+      velTicker = requestAnimationFrame(trackVelocity);
+    });
+  }
+
+  /* ── Feature cards — premium clip-path reveal on scroll ── */
+  gsap.utils.toArray('.feature-card').forEach((card, i) => {
+    gsap.fromTo(card,
+      { clipPath: 'inset(0 0 100% 0)', y: 30 },
+      {
+        clipPath: 'inset(0 0 0% 0)', y: 0,
+        duration: 1.1, ease: 'expo.out', delay: (i % 3) * 0.08,
+        scrollTrigger: { trigger: card, start: 'top 88%', toggleActions: 'play none none none' },
+      });
+  });
+
+  /* ── CTA primary button — premium idle shimmer ── */
+  gsap.utils.toArray('.btn-primary').forEach(btn => {
+    const glow = btn.querySelector('.btn-glow');
+    if (!glow) return;
+    gsap.to(glow, {
+      backgroundPosition: '200% 0',
+      duration: 3.5,
+      ease: 'none',
+      repeat: -1,
+    });
+  });
+
+  /* ── Hero title underline glow sweep (subtle, one-time) ── */
+  ScrollTrigger.create({
+    trigger: '.hero', start: 'top top', once: true,
+    onEnter: () => {
+      const gradLine = document.querySelector('.hero-title .gradient-text');
+      if (!gradLine) return;
+      const sweep = document.createElement('div');
+      Object.assign(sweep.style, {
+        position: 'absolute',
+        bottom: '-4px',
+        left: '0',
+        width: '0%',
+        height: '2px',
+        background: 'linear-gradient(90deg, transparent, hsl(159,93%,50%), hsl(217,91%,60%), transparent)',
+        boxShadow: '0 0 12px hsl(159,93%,50%,0.6)',
+        pointerEvents: 'none',
+      });
+      gradLine.style.position = 'relative';
+      gradLine.appendChild(sweep);
+      gsap.to(sweep, { width: '100%', duration: 1.4, delay: 1.6, ease: 'power3.inOut' });
+      gsap.to(sweep, { opacity: 0, duration: 0.8, delay: 3.6, ease: 'power2.out',
+        onComplete: () => sweep.remove() });
+    },
+  });
+
+  /* ── Premium scroll-driven phone parallax depth ── */
+  if (!prefersReducedMotion) {
+    gsap.to('.hero-phone-wrap', {
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1.5 },
+      y: 80,
+      scale: 0.92,
+      opacity: 0.6,
+    });
+  }
+
+  /* ── Section heading "ink reveal" — premium clip mask on every section title ── */
+  gsap.utils.toArray('.section-title').forEach(title => {
+    gsap.fromTo(title,
+      { clipPath: 'inset(0 100% 0 0)' },
+      {
+        clipPath: 'inset(0 0% 0 0)',
+        duration: 1.2,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: title, start: 'top 85%', toggleActions: 'play none none none' },
+      });
+  });
+
+  /* ── Subtle 3D lift on feature card hover (refinement layer) ── */
+  document.querySelectorAll('.feature-card').forEach(card => {
+    const icon = card.querySelector('.card-icon');
+    card.addEventListener('mouseenter', () => {
+      if (icon) gsap.to(icon, { y: -6, scale: 1.08, duration: 0.5, ease: 'back.out(2)' });
+      gsap.to(card, { y: -8, duration: 0.5, ease: 'power3.out' });
+    });
+    card.addEventListener('mouseleave', () => {
+      if (icon) gsap.to(icon, { y: 0, scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)' });
+      gsap.to(card, { y: 0, duration: 0.7, ease: 'elastic.out(1, 0.5)' });
+    });
+  });
+
+  /* ── Premium ambient glow that follows scroll position ── */
+  if (!prefersReducedMotion) {
+    const ambientGlow = document.createElement('div');
+    Object.assign(ambientGlow.style, {
+      position: 'fixed',
+      width: '600px', height: '600px',
+      borderRadius: '50%',
+      background: 'radial-gradient(circle, hsl(159,93%,50%,0.08) 0%, transparent 70%)',
+      filter: 'blur(80px)',
+      pointerEvents: 'none',
+      zIndex: '0',
+      top: '50%', left: '50%',
+      transform: 'translate(-50%, -50%)',
+      opacity: '0',
+      transition: 'opacity 0.6s',
+    });
+    document.body.appendChild(ambientGlow);
+
+    let lastUpdate = 0;
+    window.addEventListener('mousemove', (e) => {
+      const now = performance.now();
+      if (now - lastUpdate < 16) return;
+      lastUpdate = now;
+      gsap.to(ambientGlow, {
+        x: e.clientX - window.innerWidth / 2,
+        y: e.clientY - window.innerHeight / 2,
+        duration: 1.8,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
+      ambientGlow.style.opacity = '1';
+    });
+  }
+
+  /* ── Premium scroll-snap "settling" on section change ── */
+  ScrollTrigger.batch('section', {
+    onEnter: (elements) => {
+      gsap.fromTo(elements,
+        { y: 12, autoAlpha: 0.95 },
+        { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power3.out', overwrite: 'auto' });
+    },
+    start: 'top 95%',
+    once: true,
   });
 
 })();

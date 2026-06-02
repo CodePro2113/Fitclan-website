@@ -22,6 +22,9 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
+  <!-- Leaflet (Conquest map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -34,6 +37,7 @@
   <div class="ambient-orb orb-1"></div>
   <div class="ambient-orb orb-2"></div>
   <div class="ambient-orb orb-3"></div>
+  <div class="ambient-orb orb-4"></div>
 
   <!-- ====== NAV ====== -->
   <nav class="nav" id="nav">
@@ -48,8 +52,8 @@
         <li><a href="#testimonials" class="nav-link" data-magnetic>Stories</a></li>
       </ul>
       <div class="nav-actions">
-        <a href="https://app.fitclan.ca/login" data-app-path="/login" class="nav-login" data-magnetic>Log in</a>
-        <a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="nav-cta btn-magnetic" data-magnetic>
+        <a href="login.html" class="nav-login" data-magnetic>Log in</a>
+        <a href="signup.html" class="nav-cta btn-magnetic" data-magnetic>
           <span>Sign up free</span>
           <div class="btn-glow"></div>
         </a>
@@ -66,8 +70,8 @@
       <li><a href="#features" class="mobile-link">Features</a></li>
       <li><a href="#how" class="mobile-link">How It Works</a></li>
       <li><a href="#testimonials" class="mobile-link">Stories</a></li>
-      <li><a href="https://app.fitclan.ca/login" data-app-path="/login" class="mobile-link">Log in</a></li>
-      <li><a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="mobile-link cta-link">Sign up free →</a></li>
+      <li><a href="login.html" class="mobile-link">Log in</a></li>
+      <li><a href="signup.html" class="mobile-link cta-link">Sign up free →</a></li>
     </ul>
   </div>
 
@@ -92,7 +96,7 @@
       </p>
 
       <div class="hero-actions" data-reveal>
-        <a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="btn-primary btn-magnetic">
+        <a href="signup.html" class="btn-primary btn-magnetic">
           <span class="btn-text">Sign up free</span>
           <span class="btn-icon">→</span>
           <div class="btn-glow"></div>
@@ -292,11 +296,7 @@
             <p>Claim territories on a map by out-walking your clanmates. Defend your zones or launch sneak attacks. The most active member rules the board.</p>
           </div>
           <div class="conquest-visual">
-            <div class="territory" style="--c:#FF6B35; top:20%; left:15%">⬡</div>
-            <div class="territory" style="--c:#8B5CF6; top:30%; left:40%">⬡</div>
-            <div class="territory" style="--c:#FF6B35; top:55%; left:25%">⬡</div>
-            <div class="territory" style="--c:#EC4899; top:20%; left:65%">⬡</div>
-            <div class="territory" style="--c:#F59E0B; top:60%; left:60%">⬡</div>
+            <div id="conquest-map"></div>
           </div>
         </div>
 
@@ -590,12 +590,6 @@
 
       </div>
 
-      <!-- dot indicators -->
-      <div class="sc-indicators" data-reveal>
-        <div class="sc-dot active"></div>
-        <div class="sc-dot"></div>
-        <div class="sc-dot"></div>
-      </div>
     </div>
   </section>
 
@@ -767,7 +761,7 @@
         <h2 class="cta-title">Your clan's<br/>best year starts<br/><span class="gradient-text">today.</span></h2>
         <p class="cta-sub">Set up your clan in 3 minutes — sign up free on the web, or grab the Android app. First step logged before breakfast.</p>
         <div class="cta-actions">
-          <a href="https://app.fitclan.ca/signup" data-app-path="/signup" class="btn-primary btn-xl btn-magnetic">
+          <a href="signup.html" class="btn-primary btn-xl btn-magnetic">
             <span class="btn-text">Sign up free</span>
             <span class="btn-icon">→</span>
             <div class="btn-glow"></div>
@@ -802,20 +796,11 @@
             <span class="logo-text">FitClan</span>
           </div>
           <p class="footer-tagline">Making every clan move, one step at a time.</p>
-          <div class="footer-social">
-            <a href="#" class="social-btn" aria-label="Instagram">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-            </a>
-            <a href="#" class="social-btn" aria-label="Twitter">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-          </div>
         </div>
         <div class="footer-links-col">
           <h4>Product</h4>
           <a href="#features">Features</a>
           <a href="#how">How It Works</a>
-          <a href="#download">Download</a>
         </div>
         <div class="footer-links-col">
           <h4>Company</h4>
@@ -832,19 +817,153 @@
     </div>
   </footer>
 
-  <!-- ── FitClan web app URL ──────────────────────────────────────────────
-       Change this ONE line if the app is hosted on a different domain.
-       Every "Log in" / "Sign up" link on the site is rewritten from it. -->
-  <script>
-    window.FITCLAN_APP_URL = "https://app.fitclan.ca";
-    document.addEventListener("DOMContentLoaded", function () {
-      document.querySelectorAll("[data-app-path]").forEach(function (el) {
-        el.setAttribute("href", window.FITCLAN_APP_URL + el.getAttribute("data-app-path"));
-      });
-    });
-  </script>
-
   <script src="js/main.js"></script>
   <script>document.addEventListener("DOMContentLoaded",function(){if(typeof lucide!=="undefined")lucide.createIcons();});</script>
+
+  <!-- ── Conquest map (Leaflet) ─────────────────────────────────────────── -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var el = document.getElementById('conquest-map');
+    if (!el) return;
+
+    // ── Territory data (mirrored from conquestTerritories.ts) ──
+    var T = [
+      // North America
+      {c:'USA',n:'United States',  k:'land', lat:39.8,  lng:-98.5,  dv:9,  nb:['CAN','MEX','NAT','PAC']},
+      {c:'CAN',n:'Canada',         k:'land', lat:56.1,  lng:-106.3, dv:6,  nb:['USA','ARC']},
+      {c:'MEX',n:'Mexico',         k:'land', lat:23.6,  lng:-102.5, dv:5,  nb:['USA','GTM','PAC']},
+      {c:'GTM',n:'Guatemala',      k:'land', lat:15.8,  lng:-90.2,  dv:2,  nb:['MEX','COL']},
+      {c:'CUB',n:'Cuba',           k:'land', lat:21.5,  lng:-77.8,  dv:2,  nb:['USA','NAT']},
+      // South America
+      {c:'COL',n:'Colombia',       k:'land', lat:4.6,   lng:-74.0,  dv:4,  nb:['GTM','VEN','BRA','PER']},
+      {c:'VEN',n:'Venezuela',      k:'land', lat:6.4,   lng:-66.6,  dv:3,  nb:['COL','BRA']},
+      {c:'BRA',n:'Brazil',         k:'land', lat:-14.2, lng:-51.9,  dv:8,  nb:['COL','VEN','PER','ARG','SAT']},
+      {c:'PER',n:'Peru',           k:'land', lat:-9.2,  lng:-75.0,  dv:3,  nb:['COL','BRA','ARG','PAC']},
+      {c:'ARG',n:'Argentina',      k:'land', lat:-38.4, lng:-63.6,  dv:5,  nb:['BRA','PER','SAT','PAC']},
+      // Europe
+      {c:'GBR',n:'United Kingdom', k:'land', lat:55.4,  lng:-3.4,   dv:6,  nb:['FRA','NAT']},
+      {c:'FRA',n:'France',         k:'land', lat:46.2,  lng:2.2,    dv:7,  nb:['GBR','ESP','DEU','ITA','MED']},
+      {c:'ESP',n:'Spain',          k:'land', lat:40.5,  lng:-3.7,   dv:5,  nb:['FRA','MAR','MED','NAT']},
+      {c:'DEU',n:'Germany',        k:'land', lat:51.2,  lng:10.5,   dv:7,  nb:['FRA','POL','ITA']},
+      {c:'ITA',n:'Italy',          k:'land', lat:41.9,  lng:12.6,   dv:5,  nb:['FRA','DEU','MED']},
+      {c:'POL',n:'Poland',         k:'land', lat:51.9,  lng:19.1,   dv:4,  nb:['DEU','UKR','RUS']},
+      {c:'UKR',n:'Ukraine',        k:'land', lat:48.4,  lng:31.2,   dv:4,  nb:['POL','RUS','TUR']},
+      {c:'NOR',n:'Norway',         k:'land', lat:60.5,  lng:8.5,    dv:3,  nb:['ARC','NAT']},
+      // Asia
+      {c:'RUS',n:'Russia',         k:'land', lat:61.5,  lng:105.3,  dv:10, nb:['POL','UKR','CHN','MNG','KAZ','ARC']},
+      {c:'CHN',n:'China',          k:'land', lat:35.9,  lng:104.2,  dv:10, nb:['RUS','MNG','IND','JPN','KAZ','VNM','PAC']},
+      {c:'IND',n:'India',          k:'land', lat:20.6,  lng:78.9,   dv:8,  nb:['CHN','PAK','IDN','IND_OCN']},
+      {c:'JPN',n:'Japan',          k:'land', lat:36.2,  lng:138.3,  dv:7,  nb:['CHN','PAC']},
+      {c:'KAZ',n:'Kazakhstan',     k:'land', lat:48.0,  lng:66.9,   dv:4,  nb:['RUS','CHN','IRN']},
+      {c:'MNG',n:'Mongolia',       k:'land', lat:46.9,  lng:103.8,  dv:2,  nb:['RUS','CHN']},
+      {c:'IRN',n:'Iran',           k:'land', lat:32.4,  lng:53.7,   dv:5,  nb:['KAZ','TUR','SAU','PAK']},
+      {c:'TUR',n:'Turkey',         k:'land', lat:38.9,  lng:35.2,   dv:5,  nb:['UKR','IRN','SAU','MED']},
+      {c:'SAU',n:'Saudi Arabia',   k:'land', lat:23.9,  lng:45.1,   dv:5,  nb:['IRN','TUR','EGY','IND_OCN']},
+      {c:'PAK',n:'Pakistan',       k:'land', lat:30.4,  lng:69.3,   dv:4,  nb:['IND','IRN','IND_OCN']},
+      {c:'VNM',n:'Vietnam',        k:'land', lat:14.1,  lng:108.3,  dv:3,  nb:['CHN','IDN','PAC']},
+      {c:'IDN',n:'Indonesia',      k:'land', lat:-0.8,  lng:113.9,  dv:5,  nb:['IND','VNM','AUS','IND_OCN','PAC']},
+      // Africa
+      {c:'EGY',n:'Egypt',          k:'land', lat:26.8,  lng:30.8,   dv:4,  nb:['SAU','LBY','SDN','MED']},
+      {c:'LBY',n:'Libya',          k:'land', lat:26.3,  lng:17.2,   dv:3,  nb:['EGY','MAR','SDN','MED']},
+      {c:'MAR',n:'Morocco',        k:'land', lat:31.8,  lng:-7.1,   dv:3,  nb:['ESP','LBY','NAT']},
+      {c:'SDN',n:'Sudan',          k:'land', lat:12.9,  lng:30.2,   dv:3,  nb:['EGY','LBY','ETH','COD']},
+      {c:'ETH',n:'Ethiopia',       k:'land', lat:9.1,   lng:40.5,   dv:4,  nb:['SDN','KEN','IND_OCN']},
+      {c:'KEN',n:'Kenya',          k:'land', lat:-0.0,  lng:37.9,   dv:3,  nb:['ETH','TZA','COD','IND_OCN']},
+      {c:'TZA',n:'Tanzania',       k:'land', lat:-6.4,  lng:34.9,   dv:3,  nb:['KEN','COD','ZAF','IND_OCN']},
+      {c:'COD',n:'DR Congo',       k:'land', lat:-4.0,  lng:21.8,   dv:3,  nb:['SDN','KEN','TZA','NGA','ZAF']},
+      {c:'NGA',n:'Nigeria',        k:'land', lat:9.1,   lng:8.7,    dv:4,  nb:['COD','MAR','SAT']},
+      {c:'ZAF',n:'South Africa',   k:'land', lat:-30.6, lng:22.9,   dv:5,  nb:['COD','TZA','SAT','IND_OCN']},
+      // Oceania / Polar
+      {c:'AUS',n:'Australia',      k:'land', lat:-25.3, lng:133.8,  dv:6,  nb:['IDN','NZL','PAC','IND_OCN']},
+      {c:'NZL',n:'New Zealand',    k:'land', lat:-40.9, lng:174.9,  dv:3,  nb:['AUS','PAC']},
+      {c:'ARC',n:'Arctic',         k:'land', lat:80.0,  lng:0.0,    dv:2,  nb:['CAN','RUS','NOR','ARC_OCN']},
+      // Water
+      {c:'NAT',    n:'North Atlantic', k:'water', lat:40.0,  lng:-40.0,  dv:4, nb:['USA','CAN','GBR','ESP','MAR','NOR','CUB']},
+      {c:'SAT',    n:'South Atlantic', k:'water', lat:-20.0, lng:-20.0,  dv:3, nb:['BRA','ARG','ZAF','NGA']},
+      {c:'PAC',    n:'Pacific Ocean',  k:'water', lat:0.0,   lng:-150.0, dv:6, nb:['USA','MEX','PER','ARG','JPN','CHN','IDN','AUS','NZL','VNM']},
+      {c:'IND_OCN',n:'Indian Ocean',   k:'water', lat:-20.0, lng:80.0,   dv:4, nb:['IND','IDN','AUS','SAU','PAK','ETH','KEN','TZA','ZAF']},
+      {c:'MED',    n:'Mediterranean',  k:'water', lat:36.0,  lng:18.0,   dv:3, nb:['FRA','ESP','ITA','TUR','EGY','LBY']},
+      {c:'ARC_OCN',n:'Arctic Ocean',   k:'water', lat:88.0,  lng:0.0,    dv:3, nb:['ARC']},
+    ];
+
+    // ── Demo ownership (simulates an active game) ──
+    // Three clans mid-battle across the world
+    var OWNERS = {
+      // Clan Alpha — teal (brand) — North America + W.Europe + Oceania
+      'USA':'#00e896','CAN':'#00e896','GBR':'#00e896','FRA':'#00e896',
+      'AUS':'#00e896','NZL':'#00e896','NAT':'#00e896','NOR':'#00e896',
+      // Clan Beta — blue — Asia bloc
+      'RUS':'#4d9aff','CHN':'#4d9aff','JPN':'#4d9aff','MNG':'#4d9aff','KAZ':'#4d9aff',
+      // Clan Gamma — orange — South America + Africa
+      'BRA':'#ff7a3d','ARG':'#ff7a3d','ZAF':'#ff7a3d','NGA':'#ff7a3d','SAT':'#ff7a3d',
+    };
+
+    // ── Build territory lookup ──
+    var byCode = {};
+    T.forEach(function(t){ byCode[t.c] = t; });
+
+    // ── Init map ──
+    var map = L.map('conquest-map', {
+      center: [20, 0],
+      zoom: 2,
+      minZoom: 2,
+      maxZoom: 5,
+      scrollWheelZoom: false,
+      zoomControl: false,
+      attributionControl: false,
+      worldCopyJump: true,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+      subdomains: 'abcd',
+      maxZoom: 5,
+    }).addTo(map);
+
+    // ── Adjacency lines ──
+    var seen = {};
+    T.forEach(function(t) {
+      t.nb.forEach(function(n) {
+        var key = [t.c, n].sort().join('-');
+        if (seen[key]) return;
+        seen[key] = true;
+        var other = byCode[n];
+        if (!other) return;
+        L.polyline([[t.lat, t.lng], [other.lat, other.lng]], {
+          color: '#00e896',
+          weight: 0.6,
+          opacity: 0.18,
+          dashArray: '4 4',
+        }).addTo(map);
+      });
+    });
+
+    // ── Territory markers ──
+    T.forEach(function(def) {
+      var ownerColor = OWNERS[def.c] || null;
+      var fill   = ownerColor || (def.k === 'water' ? 'hsl(200,80%,55%)' : 'hsl(220,15%,35%)');
+      var stroke = ownerColor || (def.k === 'water' ? 'hsl(200,80%,70%)' : '#00e896');
+      var radius = 6 + def.dv * 0.7;
+
+      var marker = L.circleMarker([def.lat, def.lng], {
+        color:       stroke,
+        fillColor:   fill,
+        fillOpacity: ownerColor ? 0.85 : def.k === 'water' ? 0.45 : 0.55,
+        weight:      ownerColor ? 2.5 : 1.4,
+        radius:      radius,
+      });
+
+      marker.bindTooltip(
+        '<div class="cq-tip"><b>' + def.n + '</b><div class="cq-meta">' +
+        (ownerColor ? 'Claimed' : 'Unclaimed') + ' · Def ' + def.dv + '</div></div>',
+        { direction: 'top', offset: [0, -4], opacity: 1, className: 'cq-tip-wrap' }
+      );
+
+      marker.addTo(map);
+    });
+
+    map.fitBounds([[-60, -170], [78, 180]], { padding: [8, 8] });
+  });
+  </script>
 </body>
 </html>
