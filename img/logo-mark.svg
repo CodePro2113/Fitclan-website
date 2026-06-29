@@ -1,0 +1,23 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    FitClan — Mark only (transparent background)
+    Use when embedding the icon over a known dark surface.
+    Same geometry as logo-icon.svg, no background rect.
+  -->
+
+  <g transform="translate(3,5) scale(0.649)"
+     stroke="hsl(159,93%,50%)"
+     stroke-width="5"
+     stroke-linecap="square"
+     stroke-linejoin="miter"
+     fill="none">
+
+    <rect x="40" y="4" width="16" height="16"/>
+    <rect x="40" y="24" width="16" height="24"/>
+    <polyline points="56,30 66,30 66,18 74,18"/>
+    <polyline points="40,30 28,30 28,42 16,42"/>
+    <polyline points="56,48 56,62 70,62 70,78"/>
+    <polyline points="40,48 40,62 26,62 26,78"/>
+
+  </g>
+</svg>

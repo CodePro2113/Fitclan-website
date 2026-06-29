@@ -61,15 +61,22 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Ambient orb ── */
+    /* ── Topographic contour background (matches the marketing site) ── */
+    /* Subtle teal elevation contour lines + vignette, drifting almost
+       imperceptibly. Fixed, behind all content, freezes under reduced motion. */
     .orb-bg {
-      position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
-      width: 800px; height: 800px;
-      background: radial-gradient(circle, hsl(159,93%,50%,0.09) 0%, transparent 65%);
-      top: -350px; right: -250px; filter: blur(120px);
-      animation: orbDrift 32s ease-in-out infinite;
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        radial-gradient(ellipse 78% 78% at 50% 42%, transparent 0%, transparent 46%, hsl(228,12%,6%) 92%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%2300e896' stroke-width='1.1'%3E%3Cpath d='M-40 300 C 80 230 180 360 300 290 S 520 200 640 270'/%3E%3Cpath d='M-40 350 C 90 290 190 410 300 345 S 520 270 640 325'/%3E%3Cpath d='M-40 250 C 70 170 200 300 300 235 S 510 140 640 215'/%3E%3Cpath d='M-40 200 C 100 130 180 250 300 180 S 530 90 640 160'/%3E%3Cpath d='M-40 410 C 80 360 210 460 300 405 S 520 340 640 390'/%3E%3Cpath d='M120 -40 C 60 80 200 160 150 300 S 60 480 120 640'/%3E%3Cpath d='M470 -40 C 540 90 410 180 470 320 S 560 470 480 640'/%3E%3Ccircle cx='300' cy='290' r='34'/%3E%3Ccircle cx='300' cy='290' r='70'/%3E%3Ccircle cx='300' cy='290' r='112'/%3E%3C/g%3E%3C/svg%3E");
+      background-repeat: no-repeat, repeat;
+      background-size: 100% 100%, 600px 600px;
+      background-position: 0 0, 0 0;
+      opacity: 0.065;
+      will-change: background-position;
+      animation: topoDrift 56s linear infinite;
     }
-    @keyframes orbDrift { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,-50px) scale(1.06)} }
+    @keyframes topoDrift { 0%{background-position:0 0,0 0} 100%{background-position:0 0,600px 600px} }
     @media (prefers-reduced-motion: reduce) { .orb-bg { animation: none; } }
 
     /* ══════════════════════════════════
@@ -547,10 +554,16 @@
       backdrop-filter: blur(16px); z-index: 100;
       padding: 0.4rem 0 calc(0.4rem + env(safe-area-inset-bottom));
     }
-    .bn-items { display: flex; }
+    /* Scrollable "spinning" bar — fits any number of tabs, swipe horizontally */
+    .bn-items {
+      display: flex; overflow-x: auto; scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .bn-items::-webkit-scrollbar { display: none; }
     .bn-item {
-      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-      padding: 0.45rem; cursor: pointer; border: none; background: none;
+      flex: 0 0 auto; min-width: 72px; scroll-snap-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 0.45rem 0.6rem; cursor: pointer; border: none; background: none;
       color: var(--muted); font-size: 0.62rem; font-weight: 600; transition: color .15s;
     }
     .bn-item.active { color: var(--teal); }
@@ -559,6 +572,82 @@
     /* Tabs */
     .tab { display: none; }
     .tab.active { display: block; }
+
+    /* ── Mood / Lazy Mode ── */
+    .mood-card .mood-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+    .mood-pick {
+      border: 1px solid var(--border); background: var(--bg3); border-radius: 14px;
+      padding: 0.7rem 0.4rem; text-align: center; cursor: pointer; transition: all .15s;
+    }
+    .mood-pick:hover { border-color: var(--teal-dim); transform: translateY(-2px); }
+    .mood-pick.sel { border-color: var(--teal); background: var(--teal-dim); }
+    .mood-pick svg { width: 20px; height: 20px; color: var(--teal); margin-bottom: 4px; }
+    .mood-pick .mp-label { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .mood-pick .mp-goal { font-size: 0.6rem; color: var(--muted); margin-top: 2px; }
+    .mood-bar-track { height: 10px; background: var(--bg4); border-radius: 6px; overflow: hidden; margin-top: 0.6rem; }
+    .mood-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--teal), var(--blue)); transition: width .6s cubic-bezier(.16,1,.3,1); }
+
+    /* ── Generic progress row (weekly goal, baseline) ── */
+    .goal-ring-row { display: flex; align-items: center; gap: 1.1rem; }
+    .goal-big { font-family: var(--font-h); font-weight: 700; font-size: 1.5rem; }
+    .goal-sub { font-size: 0.78rem; color: var(--muted); }
+    .mini-track { height: 8px; background: var(--bg4); border-radius: 5px; overflow: hidden; margin-top: 0.5rem; }
+    .mini-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--teal), var(--blue)); }
+    .member-steps-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; border-top: 1px solid var(--border); font-size: 0.82rem; }
+    .member-steps-row:first-child { border-top: none; }
+
+    /* ── League tiers ── */
+    .tier-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.9rem;
+      border-radius: 999px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: .06em;
+      border: 1.5px solid var(--border);
+    }
+    .tier-bronze  { color: #cd7f32; border-color: #cd7f3266; background: #cd7f3214; }
+    .tier-silver  { color: #c0c8d4; border-color: #c0c8d466; background: #c0c8d414; }
+    .tier-gold    { color: var(--gold); border-color: var(--gold-glow); background: var(--gold-dim, hsl(45,100%,60%,0.12)); }
+    .tier-diamond { color: #6fd3ff; border-color: #6fd3ff66; background: #6fd3ff14; }
+    .tier-titan   { color: #b39cff; border-color: #b39cff66; background: #b39cff14; }
+    .league-row { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 0.8rem; padding: 0.7rem 0; border-top: 1px solid var(--border); }
+    .league-row:first-child { border-top: none; }
+    .league-row.is-me { background: var(--teal-dim); margin: 0 -0.6rem; padding: 0.7rem 0.6rem; border-radius: 10px; border-top: none; }
+
+    /* ── Achievements ── */
+    .ach-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
+    .ach-card { border: 1px solid var(--border); border-radius: 14px; padding: 0.9rem; background: var(--bg3); display: flex; gap: 0.7rem; align-items: center; opacity: 0.45; }
+    .ach-card.unlocked { opacity: 1; border-color: var(--teal-dim); }
+    .ach-ic { width: 40px; height: 40px; border-radius: 10px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; background: var(--bg4); color: var(--muted); }
+    .ach-card.unlocked .ach-ic { background: var(--teal-dim); color: var(--teal); }
+    .ach-title { font-weight: 700; font-size: 0.85rem; }
+    .ach-desc { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Rescue ── */
+    .rescue-row { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 0; border-top: 1px solid var(--border); }
+    .rescue-row:first-child { border-top: none; }
+    .btn-rescue {
+      margin-left: auto; border: 1px solid var(--teal); color: var(--teal); background: var(--teal-dim);
+      border-radius: 999px; padding: 0.35rem 0.8rem; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-rescue:disabled { opacity: 0.5; cursor: default; }
+
+    /* ── Log = needs phone ── */
+    .phone-hero { text-align: center; padding: 2.5rem 1.5rem; }
+    .phone-hero .ph-ic {
+      width: 76px; height: 76px; border-radius: 20px; margin: 0 auto 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--teal-dim); color: var(--teal); border: 1.5px solid var(--teal-glow);
+    }
+    .phone-hero .ph-ic svg { width: 38px; height: 38px; }
+    .phone-hero h3 { font-family: var(--font-h); font-size: 1.4rem; font-weight: 700; }
+    .phone-hero p { color: var(--text-2); font-size: 0.9rem; max-width: 440px; margin: 0.6rem auto 0; line-height: 1.55; }
+    .ph-steps { display: grid; gap: 0.6rem; max-width: 420px; margin: 1.6rem auto 0; text-align: left; }
+    .ph-step { display: flex; gap: 0.8rem; align-items: flex-start; }
+    .ph-step .n { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; background: var(--teal-dim); color: var(--teal); font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
+    .ph-step .t { font-size: 0.84rem; color: var(--text-2); }
+    .ph-cta {
+      display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.8rem;
+      background: linear-gradient(135deg, var(--teal), var(--blue)); color: hsl(228,20%,7%);
+      font-weight: 700; padding: 0.8rem 1.6rem; border-radius: 999px; text-decoration: none; font-size: 0.95rem;
+    }
 
     /* ── Avatar picker ── */
     .avatar-picker-wrap { margin-top: 1rem; }
@@ -689,13 +778,7 @@
   <!-- Loading -->
   <div id="loadingScreen">
     <div class="load-logo">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-        <defs><linearGradient id="llg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="hsl(159,93%,50%)"/><stop offset="100%" stop-color="hsl(217,91%,60%)"/>
-        </linearGradient></defs>
-        <path d="M12 2C12 2 7 7 7 12.5a5 5 0 0010 0C17 7 12 2 12 2z" fill="url(#llg)" opacity=".9"/>
-        <path d="M12 8c0 0-2.5 3-2.5 4.5a2.5 2.5 0 005 0C14.5 11 12 8 12 8z" fill="white" opacity=".7"/>
-      </svg>
+      <img src="img/logo.png" alt="FitClan" width="32" height="32" style="border-radius:8px">
       <span class="load-logo-text">FitClan</span>
     </div>
     <div class="load-spinner"></div>
@@ -711,13 +794,7 @@
       <aside class="sidebar">
         <div class="sidebar-header">
           <div class="sidebar-logo">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <defs><linearGradient id="slg" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="hsl(159,93%,50%)"/><stop offset="100%" stop-color="hsl(217,91%,60%)"/>
-              </linearGradient></defs>
-              <path d="M12 2C12 2 7 7 7 12.5a5 5 0 0010 0C17 7 12 2 12 2z" fill="url(#slg)" opacity=".9"/>
-              <path d="M12 8c0 0-2.5 3-2.5 4.5a2.5 2.5 0 005 0C14.5 11 12 8 12 8z" fill="white" opacity=".7"/>
-            </svg>
+            <img src="img/logo.png" alt="FitClan" width="30" height="30" style="border-radius:8px">
             <span class="sidebar-logo-text">FitClan</span>
           </div>
         </div>
@@ -751,6 +828,22 @@
           <button class="nav-item" data-tab="conquest">
             <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
             Conquest
+          </button>
+          <button class="nav-item" data-tab="missions">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Missions
+          </button>
+          <button class="nav-item" data-tab="league">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4h20l-2 7a8 8 0 0 1-16 0z"/><path d="M12 11v6"/><path d="M8 21h8"/></svg>
+            League
+          </button>
+          <button class="nav-item" data-tab="achievements">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 22l5-3 5 3-1.21-8.11"/></svg>
+            Achievements
+          </button>
+          <button class="nav-item" data-tab="log">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+            Log Activity
           </button>
 
           <div class="nav-section-label">Account</div>
@@ -836,6 +929,26 @@
               <!-- filled by JS -->
             </div>
 
+            <!-- Feature cards: mood, weekly goal, beat past self, rescue -->
+            <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:0.5rem;">
+              <div class="card mood-card" id="moodCard" style="grid-column:1/-1;">
+                <div class="section-title"><div class="section-title-dot"></div>Today's Vibe</div>
+                <div id="moodBody"><div class="empty-state"><p>Loading…</p></div></div>
+              </div>
+              <div class="card" id="weeklyGoalCard" style="grid-column:1/-1;">
+                <div class="section-title"><div class="section-title-dot"></div>Weekly Clan Goal</div>
+                <div id="weeklyGoalBody"><div class="empty-state"><p>Loading…</p></div></div>
+              </div>
+              <div class="card" id="baselineCard">
+                <div class="section-title"><div class="section-title-dot"></div>Beat Your Past Self</div>
+                <div id="baselineBody"><div class="empty-state"><p>Loading…</p></div></div>
+              </div>
+              <div class="card" id="rescueCard">
+                <div class="section-title"><div class="section-title-dot"></div>Rescue Missions</div>
+                <div id="rescueBody"><div class="empty-state"><p>Loading…</p></div></div>
+              </div>
+            </div>
+
             <div class="two-col">
               <!-- Left: missions + feed -->
               <div>
@@ -910,9 +1023,10 @@
 alter table territory_control enable row level security;
 create policy "read" on territory_control for select using (true);
 create policy "insert" on territory_control for insert with check (auth.uid() = captured_by);
--- Only the current capturer can overwrite a territory (prevents rival clans
--- stealing each other's territory via direct API call without going through
--- the attack flow in the app).
+-- Capture is open by design: any clan can overwrite any territory (that IS the
+-- conquest mechanic). The WITH CHECK forces the new capturer to stamp their own
+-- uid. This map is cosmetic — no points/AP are awarded on the web; real,
+-- server-validated Conquest scoring lives in the Android app.
 create policy "update" on territory_control for update using (true) with check (auth.uid() = captured_by);</pre>
             </div>
             <div class="conquest-layout">
@@ -982,6 +1096,57 @@ create policy "update" on territory_control for update using (true) with check (
             </div>
           </div>
 
+          <!-- ═══ MISSIONS TAB ═══ -->
+          <div class="tab" id="tab-missions">
+            <div class="section-title"><div class="section-title-dot"></div>Today's Missions</div>
+            <div class="card" id="missionsTabList">
+              <div class="empty-state"><div class="load-spinner" style="margin:0 auto;border-top-color:var(--teal);"></div></div>
+            </div>
+          </div>
+
+          <!-- ═══ LEAGUE TAB ═══ -->
+          <div class="tab" id="tab-league">
+            <div class="section-title"><div class="section-title-dot"></div>Family Fitness League</div>
+            <div class="card" id="leagueBody">
+              <div class="empty-state"><p>Loading league…</p></div>
+            </div>
+          </div>
+
+          <!-- ═══ ACHIEVEMENTS TAB ═══ -->
+          <div class="tab" id="tab-achievements">
+            <div class="section-title"><div class="section-title-dot"></div>Achievements</div>
+            <div class="ach-grid" id="achGrid"></div>
+          </div>
+
+          <!-- ═══ LOG ACTIVITY TAB (sync via phone) ═══ -->
+          <div class="tab" id="tab-log">
+            <div class="card">
+              <div class="phone-hero">
+                <div class="ph-ic">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M9 18h6"/></svg>
+                </div>
+                <h3>Logging happens on your phone</h3>
+                <p>
+                  FitClan reads your steps and workouts straight from <strong style="color:var(--text);">Health Connect</strong> on
+                  Android — no manual entry, no faking it. Install the app once and your points sync automatically,
+                  even when this dashboard is closed.
+                </p>
+                <div class="ph-steps">
+                  <div class="ph-step"><span class="n">1</span><span class="t">Install FitClan on your Android phone.</span></div>
+                  <div class="ph-step"><span class="n">2</span><span class="t">Sign in with this same account and connect Health Connect.</span></div>
+                  <div class="ph-step"><span class="n">3</span><span class="t">Move — steps and workouts sync to your clan automatically.</span></div>
+                </div>
+                <a class="ph-cta" href="index.html#download">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3l16 9-16 9V3z"/></svg>
+                  Get FitClan for Android
+                </a>
+                <p style="margin-top:1.2rem;font-size:0.78rem;color:var(--muted);">
+                  You can still pick your daily vibe, attack territory, and track your clan right here on the web.
+                </p>
+              </div>
+            </div>
+          </div>
+
         </div><!-- /content -->
       </main>
     </div><!-- /layout -->
@@ -1000,6 +1165,22 @@ create policy "update" on territory_control for update using (true) with check (
         <button class="bn-item" data-tab="conquest">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
           Conquest
+        </button>
+        <button class="bn-item" data-tab="missions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          Missions
+        </button>
+        <button class="bn-item" data-tab="league">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4h20l-2 7a8 8 0 0 1-16 0z"/><path d="M12 11v6"/><path d="M8 21h8"/></svg>
+          League
+        </button>
+        <button class="bn-item" data-tab="achievements">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 22l5-3 5 3-1.21-8.11"/></svg>
+          Awards
+        </button>
+        <button class="bn-item" data-tab="log">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+          Log
         </button>
         <button class="bn-item" data-tab="profile">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1059,7 +1240,7 @@ create policy "update" on territory_control for update using (true) with check (
       steps:   { label: 'Steps',    unit: 'steps', goal: 10000, ptsPerUnit: 10, unitsPer: 1000 },
       workout: { label: 'Workout',  unit: 'min',   goal: 30,    ptsPerUnit: 10, unitsPer: 10   },
       calories:{ label: 'Calories', unit: 'cal',   goal: 500,   ptsPerUnit: 20, unitsPer: 500  },
-      water:   { label: 'Water',    unit: 'glasses',goal: 8,    ptsPerUnit: 10, unitsPer: 8    },
+      water:   { label: 'Water',    unit: 'glasses',goal: 8,    ptsPerUnit: 0,  unitsPer: 8    },
     };
 
     const ACT_ICONS = {
@@ -1078,6 +1259,23 @@ create policy "update" on territory_control for update using (true) with check (
     let session = null, profile = null, family = null;
     let clanMembers = [], clanActivities = [];
     let allMyActs = [], missions = [], sortMode = 'total';
+    let todaysMood = null, rescuedToday = [], leagueLoaded = false, baselineLoaded = false;
+
+    // ── Mood / Lazy Mode catalog (mirrors credit_mood_goal() in SQL) ──
+    const MOOD_ICONS = {
+      ready:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+      busy:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`,
+      tired:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>`,
+      lazy:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>`,
+      bare_minimum: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`,
+    };
+    const MOODS = [
+      { key: 'ready',        label: 'Ready', goal: 5000, bonus: 40, icon: MOOD_ICONS.ready },
+      { key: 'busy',         label: 'Busy',  goal: 2500, bonus: 25, icon: MOOD_ICONS.busy },
+      { key: 'tired',        label: 'Tired', goal: 1500, bonus: 20, icon: MOOD_ICONS.tired },
+      { key: 'lazy',         label: 'Lazy',  goal: 800,  bonus: 15, icon: MOOD_ICONS.lazy },
+      { key: 'bare_minimum', label: 'Bare',  goal: 400,  bonus: 10, icon: MOOD_ICONS.bare_minimum },
+    ];
 
     // ── Utils ──
     /** Escape HTML special chars before inserting user-supplied strings into innerHTML. */
@@ -1165,17 +1363,19 @@ create policy "update" on territory_control for update using (true) with check (
     const today = todayKey();
     const todayStart = today + 'T00:00:00.000Z';
 
-    const [profRes, actsRes, missRes, memberRes] = await Promise.all([
+    const [profRes, actsRes, missRes, memberRes, moodRes] = await Promise.all([
       sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
       sb.from('activities').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(100),
-      sb.from('daily_missions').select('*').eq('user_id', session.user.id).eq('date', today),
-      sb.from('family_members').select('family_id, families(id, name)').eq('user_id', session.user.id).maybeSingle(),
+      sb.from('daily_missions').select('*').eq('user_id', session.user.id).eq('mission_date', today),
+      sb.from('family_members').select('family_id, families(id, name, weekly_step_goal)').eq('user_id', session.user.id).maybeSingle(),
+      sb.from('daily_moods').select('*').eq('user_id', session.user.id).eq('mood_date', today).maybeSingle(),
     ]);
 
     profile = profRes.data;
     allMyActs = actsRes.data || [];
     missions = missRes.data || [];
     const membership = memberRes.data;
+    todaysMood = moodRes.data || null;
 
     // If profile row doesn't exist yet (no DB trigger created it), create one
     if (!profile) {
@@ -1198,14 +1398,19 @@ create policy "update" on territory_control for update using (true) with check (
       const memberIds = clanMembers.map(m => m.user_id);
       if (memberIds.length) {
         const { data: cActs } = await sb.from('activities')
-          .select('user_id, points, created_at').in('user_id', memberIds);
+          .select('user_id, type, value, points, label, created_at').in('user_id', memberIds);
         clanActivities = cActs || [];
       }
+      // Who I've already rescued today (to disable the button)
+      const { data: rescues } = await sb.from('rescue_completions')
+        .select('rescued_id').eq('rescuer_id', session.user.id).eq('rescue_date', today);
+      rescuedToday = (rescues || []).map(r => r.rescued_id);
     }
 
     renderUI();
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    loadBaseline(); // async — fills the "Beat Your Past Self" card
 
     // ── Render ──
     function renderUI() {
@@ -1290,8 +1495,19 @@ create policy "update" on territory_control for update using (true) with check (
       renderLeaderboardPreview();
       renderFullLeaderboard();
       renderMissions();
+      renderMissionsTab();
       renderFeed();
       renderProfile();
+      renderMood();
+      renderWeeklyGoal();
+      renderRescue();
+      renderAchievements();
+    }
+
+    // Today's steps from verified synced activities
+    function myTodaySteps() {
+      return allMyActs.filter(a => a.type === 'steps' && a.created_at >= todayStart)
+        .reduce((s, a) => s + (a.value || 0), 0);
     }
 
     function buildLeaderboard(mode) {
@@ -1447,7 +1663,7 @@ create policy "update" on territory_control for update using (true) with check (
         document.getElementById('feedList').innerHTML = `
           <div class="empty-state">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            <p>No activities yet — head to Log Activity to get started.</p>
+            <p>No activities yet — sync your phone and your steps will appear here.</p>
           </div>`;
         return;
       }
@@ -1516,6 +1732,268 @@ create policy "update" on territory_control for update using (true) with check (
     // ══════════════════════════════════════════
     // CONQUEST
     // ══════════════════════════════════════════
+    // ══════════════════════════════════════════
+    // MOOD / LAZY MODE  (step goals, verified credit)
+    // (MOODS / MOOD_ICONS are defined near the top — before renderUI runs)
+    // ══════════════════════════════════════════
+    function renderMood() {
+      const body = document.getElementById('moodBody');
+      if (!body) return;
+      const steps = myTodaySteps();
+      if (!todaysMood) {
+        body.innerHTML = `
+          <p style="font-size:0.82rem;color:var(--text-2);margin-bottom:0.7rem;">Pick your vibe — we'll set a step goal you can actually hit. Points unlock automatically when you reach it.</p>
+          <div class="mood-grid">${MOODS.map(m => `
+            <button class="mood-pick" data-mood="${m.key}">${m.icon}<div class="mp-label">${m.label}</div><div class="mp-goal">${m.goal.toLocaleString()}</div></button>`).join('')}</div>
+          <p style="font-size:0.68rem;color:var(--muted);text-align:center;margin-top:0.6rem;">Goals are verified from your synced steps — no faking it.</p>`;
+        body.querySelectorAll('.mood-pick').forEach(b => b.addEventListener('click', () => setMood(b.dataset.mood)));
+        return;
+      }
+      const m = MOODS.find(x => x.key === todaysMood.mood) || MOODS[0];
+      const done = todaysMood.mission_completed;
+      // Count steps earned SINCE the vibe was picked, not the day's total.
+      const earned = Math.max(0, steps - (todaysMood.start_steps || 0));
+      const pct = Math.min(100, Math.round((earned / m.goal) * 100));
+      const remaining = Math.max(0, m.goal - earned);
+      body.innerHTML = `
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.2rem;">
+          <div style="width:42px;height:42px;border-radius:12px;background:var(--teal-dim);display:flex;align-items:center;justify-content:center;color:var(--teal);flex:0 0 auto;">${m.icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:0.78rem;color:var(--teal);">${m.label} mode</div>
+            <div style="font-size:0.85rem;">${m.goal.toLocaleString()} steps today</div>
+          </div>
+          <div style="font-weight:700;color:${done ? 'var(--teal)' : 'var(--text-2)'};">+${m.bonus}</div>
+        </div>
+        <div class="mood-bar-track"><div class="mood-bar-fill" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.74rem;margin-top:0.45rem;${done ? 'color:var(--teal);' : 'color:var(--muted);'}">
+          ${done
+            ? `<span>Goal hit — +${todaysMood.points_awarded} pts, streak safe</span><span></span>`
+            : `<span>${earned.toLocaleString()} / ${m.goal.toLocaleString()} since pick</span><span>${remaining.toLocaleString()} to go</span>`}
+        </div>
+        ${done ? '' : `<button id="moodChange" style="margin-top:0.6rem;background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;width:100%;">Change my vibe</button>`}`;
+      const ch = document.getElementById('moodChange');
+      if (ch) ch.addEventListener('click', () => { todaysMood = null; renderMood(); });
+      if (!done && earned >= m.goal) creditMood();
+    }
+
+    async function setMood(key) {
+      // set_today_mood stamps the current synced step count as the baseline, so
+      // the goal counts steps earned AFTER picking (no instant-complete).
+      const { data, error } = await sb.rpc('set_today_mood', { _mood: key });
+      if (error) { showToast('Could not save mood', 'err'); return; }
+      todaysMood = data;
+      renderMood();
+    }
+
+    async function creditMood() {
+      if (!todaysMood || todaysMood.mission_completed) return;
+      const { data, error } = await sb.rpc('credit_mood_goal', { _mood_id: todaysMood.id });
+      if (error) return;
+      if (data && data.credited) {
+        todaysMood.mission_completed = true;
+        todaysMood.points_awarded = data.points;
+        const { data: na } = await sb.from('activities').select('*')
+          .eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(100);
+        allMyActs = na || allMyActs;
+        showToast(`Goal smashed! +${data.points} pts`);
+        renderUI();
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // WEEKLY CLAN GOAL
+    // ══════════════════════════════════════════
+    function renderWeeklyGoal() {
+      const body = document.getElementById('weeklyGoalBody');
+      if (!body) return;
+      if (!family) {
+        body.innerHTML = `<p style="font-size:0.82rem;color:var(--muted);">Join a clan in the app to chase a shared weekly step goal.</p>`;
+        return;
+      }
+      const goal = family.weekly_step_goal || 100000;
+      const since = new Date(); since.setDate(since.getDate() - 6); since.setHours(0, 0, 0, 0);
+      const sinceIso = since.toISOString();
+      const byUser = {};
+      clanActivities.filter(a => a.type === 'steps' && a.created_at >= sinceIso)
+        .forEach(a => { byUser[a.user_id] = (byUser[a.user_id] || 0) + (a.value || 0); });
+      const total = Object.values(byUser).reduce((s, v) => s + v, 0);
+      const pct = Math.min(100, Math.round((total / goal) * 100));
+      const rows = clanMembers
+        .map(mem => ({ name: mem.profiles?.display_name || 'Member', steps: byUser[mem.user_id] || 0 }))
+        .sort((a, b) => b.steps - a.steps);
+      body.innerHTML = `
+        <div class="goal-ring-row">
+          <div><div class="goal-big">${total.toLocaleString()}</div><div class="goal-sub">of ${goal.toLocaleString()} steps this week</div></div>
+          <div style="margin-left:auto;font-family:var(--font-h);font-weight:700;color:var(--teal);font-size:1.3rem;">${pct}%</div>
+        </div>
+        <div class="mini-track"><div class="mini-fill" style="width:${pct}%"></div></div>
+        <div style="margin-top:0.7rem;">${rows.map(r => `
+          <div class="member-steps-row"><span>${escHtml(r.name)}</span><span style="margin-left:auto;color:var(--text-2);">${r.steps.toLocaleString()}</span></div>`).join('')}</div>`;
+    }
+
+    // ══════════════════════════════════════════
+    // RESCUE MISSIONS  (social; no leaderboard points)
+    // ══════════════════════════════════════════
+    function renderRescue() {
+      const body = document.getElementById('rescueBody');
+      if (!body) return;
+      if (!family) {
+        body.innerHTML = `<p style="font-size:0.82rem;color:var(--muted);">Rescue missions unlock when you're in a clan.</p>`;
+        return;
+      }
+      const stepsToday = {};
+      clanActivities.filter(a => a.type === 'steps' && a.created_at >= todayStart)
+        .forEach(a => { stepsToday[a.user_id] = (stepsToday[a.user_id] || 0) + (a.value || 0); });
+      const atRisk = clanMembers.filter(m => m.user_id !== session.user.id && (stepsToday[m.user_id] || 0) < 1000);
+      if (!atRisk.length) {
+        body.innerHTML = `<p style="font-size:0.82rem;color:var(--text-2);">Everyone's moving today. No rescues needed.</p>`;
+        return;
+      }
+      body.innerHTML = atRisk.map(m => {
+        const done = rescuedToday.includes(m.user_id);
+        const name = m.profiles?.display_name || 'Member';
+        return `<div class="rescue-row">
+          <div class="lb-avatar">${initials(name)}</div>
+          <div><div style="font-weight:600;font-size:0.85rem;">${escHtml(name)}</div>
+          <div style="font-size:0.72rem;color:var(--muted);">${(stepsToday[m.user_id] || 0).toLocaleString()} steps today</div></div>
+          <button class="btn-rescue" data-uid="${m.user_id}" ${done ? 'disabled' : ''}>${done ? 'Sent' : 'Rescue'}</button>
+        </div>`;
+      }).join('');
+      body.querySelectorAll('.btn-rescue').forEach(b => {
+        if (!b.disabled) b.addEventListener('click', () => doRescue(b.dataset.uid, b));
+      });
+    }
+
+    async function doRescue(uid, btn) {
+      btn.disabled = true; btn.textContent = '…';
+      const { error } = await sb.from('rescue_completions').insert({
+        family_id: family.id, rescuer_id: session.user.id, rescued_id: uid,
+        rescue_key: 'cheer', rescue_title: 'Sent encouragement', rescue_value: 1,
+        points_awarded: 0, rescue_date: today,
+      });
+      if (error) { showToast('Could not send rescue', 'err'); btn.disabled = false; btn.textContent = 'Rescue'; return; }
+      rescuedToday.push(uid); btn.textContent = 'Sent';
+      showToast('Rescue sent — nice teamwork!');
+    }
+
+    // ══════════════════════════════════════════
+    // MISSIONS TAB
+    // ══════════════════════════════════════════
+    function renderMissionsTab() {
+      const el = document.getElementById('missionsTabList');
+      if (!el) return;
+      if (!missions.length) {
+        el.innerHTML = `<div class="empty-state"><p>No missions assigned for today. They refresh daily — check back tomorrow.</p></div>`;
+        return;
+      }
+      el.innerHTML = missions.map(m => `
+        <div class="mission-item ${m.completed ? 'done' : ''}">
+          <div class="mission-check ${m.completed ? 'done' : ''}">${m.completed ? '<svg viewBox="0 0 24 24" fill="none" stroke="hsl(228,12%,6%)" stroke-width="3" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>' : ''}</div>
+          <div class="mission-body"><div class="mission-title">${escHtml(m.title || m.type)}</div>${m.description ? `<div class="mission-sub">${escHtml(m.description)}</div>` : ''}</div>
+          <div class="mission-pts">+${parseInt(m.points_reward, 10) || 0} pts</div>
+        </div>`).join('');
+    }
+
+    // ══════════════════════════════════════════
+    // ACHIEVEMENTS  (client-computed milestones)
+    // ══════════════════════════════════════════
+    function renderAchievements() {
+      const grid = document.getElementById('achGrid');
+      if (!grid) return;
+      const totalPts = allMyActs.reduce((s, a) => s + (a.points || 0), 0);
+      const streak = computeStreak(allMyActs);
+      const totalSteps = allMyActs.filter(a => a.type === 'steps').reduce((s, a) => s + (a.value || 0), 0);
+      const defs = [
+        { t: 'First Steps',    d: 'Log your first activity', ok: allMyActs.length > 0 },
+        { t: 'Getting Started',d: 'Earn 100 points',         ok: totalPts >= 100 },
+        { t: 'Point Machine',  d: 'Earn 1,000 points',       ok: totalPts >= 1000 },
+        { t: 'Elite',          d: 'Earn 5,000 points',       ok: totalPts >= 5000 },
+        { t: 'On Fire',        d: '3-day streak',            ok: streak >= 3 },
+        { t: 'Unstoppable',    d: '7-day streak',            ok: streak >= 7 },
+        { t: 'Step Master',    d: '50,000 lifetime steps',   ok: totalSteps >= 50000 },
+        { t: 'Clan Member',    d: 'Join a clan',             ok: !!family },
+      ];
+      const star = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="12 2 15 9 22 9 16 14 18 21 12 17 6 21 8 14 2 9 9 9"/></svg>`;
+      grid.innerHTML = defs.map(a => `
+        <div class="ach-card ${a.ok ? 'unlocked' : ''}">
+          <div class="ach-ic">${star}</div>
+          <div><div class="ach-title">${a.t}</div><div class="ach-desc">${a.d}</div></div>
+        </div>`).join('');
+    }
+
+    // ══════════════════════════════════════════
+    // BEAT YOUR PAST SELF  (personal baseline)
+    // ══════════════════════════════════════════
+    async function loadBaseline() {
+      if (baselineLoaded) return; baselineLoaded = true;
+      const body = document.getElementById('baselineBody');
+      if (!body) return;
+      try {
+        const { data, error } = await sb.rpc('refresh_personal_baseline');
+        if (error) throw error;
+        const b = Array.isArray(data) ? data[0] : data;
+        if (!b) {
+          body.innerHTML = `<p style="font-size:0.82rem;color:var(--muted);">Keep moving — your baseline builds over a few days of synced steps.</p>`;
+          return;
+        }
+        const steps = myTodaySteps();
+        const target = b.target_steps || 0;
+        const pct = target > 0 ? Math.min(100, Math.round((steps / target) * 100)) : 0;
+        body.innerHTML = `
+          <div class="goal-sub">Beat your recent average. Today's target:</div>
+          <div class="goal-ring-row" style="margin-top:0.3rem;">
+            <div><div class="goal-big">${steps.toLocaleString()}</div><div class="goal-sub">of ${target.toLocaleString()} step target</div></div>
+            <div style="margin-left:auto;font-family:var(--font-h);font-weight:700;color:${steps >= target && target > 0 ? 'var(--teal)' : 'var(--text-2)'};font-size:1.3rem;">${pct}%</div>
+          </div>
+          <div class="mini-track"><div class="mini-fill" style="width:${pct}%"></div></div>
+          <div class="goal-sub" style="margin-top:0.5rem;">Baseline avg: ${(b.baseline_steps || 0).toLocaleString()} steps/day</div>`;
+      } catch (e) {
+        body.innerHTML = `<p style="font-size:0.82rem;color:var(--muted);">Your personal baseline will appear once you've synced a few days of activity.</p>`;
+      }
+    }
+
+    // ══════════════════════════════════════════
+    // FAMILY LEAGUE
+    // ══════════════════════════════════════════
+    async function loadLeague() {
+      if (leagueLoaded) return; leagueLoaded = true;
+      const body = document.getElementById('leagueBody');
+      if (!body) return;
+      if (!family) {
+        body.innerHTML = `<div class="empty-state"><p>Join a clan to compete in the weekly tiered league.</p></div>`;
+        return;
+      }
+      try {
+        const { data: mine, error } = await sb.rpc('refresh_my_family_league_standing');
+        if (error) throw error;
+        const row = Array.isArray(mine) ? mine[0] : mine;
+        if (!row) {
+          body.innerHTML = `<div class="empty-state"><p>Your standing appears once your clan logs activity this week.</p></div>`;
+          return;
+        }
+        const { data: standings } = await sb.from('family_league_standings')
+          .select('family_id, league_points, rank_in_tier, families(name)')
+          .eq('tier', row.tier).eq('season_week', row.season_week)
+          .order('league_points', { ascending: false });
+        const tierName = row.tier.charAt(0).toUpperCase() + row.tier.slice(1);
+        let html = `
+          <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;flex-wrap:wrap;">
+            <span class="tier-badge tier-${row.tier}">${tierName} Tier</span>
+            <span class="goal-sub">${(row.league_points || 0).toLocaleString()} league pts · rank #${row.rank_in_tier || '—'}</span>
+          </div>`;
+        html += (standings || []).map((s, i) => `
+          <div class="league-row ${s.family_id === family.id ? 'is-me' : ''}">
+            <div class="lb-rank">${i + 1}</div>
+            <div style="font-weight:600;font-size:0.88rem;">${escHtml(s.families?.name || 'Clan')}${s.family_id === family.id ? ' (You)' : ''}</div>
+            <div style="font-weight:700;color:var(--teal);">${(s.league_points || 0).toLocaleString()}</div>
+          </div>`).join('');
+        body.innerHTML = html;
+      } catch (e) {
+        body.innerHTML = `<div class="empty-state"><p>League isn't available yet — make sure the latest database migration has run.</p></div>`;
+      }
+    }
+
+
     let conquestMap = null, conquestLayers = {}, conquestData = {};
     const CONQUEST_TERRITORIES = [
       { id:'USA',  name:'United States',      latlng:[38,-97],     region:'North America' },
@@ -1654,12 +2132,12 @@ create policy "update" on territory_control for update using (true) with check (
         html += `
           <button class="btn-attack" id="attackBtn" data-tid="${t.id}" data-tname="${t.name}" data-cost="${cost}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-            Attack (+${cost} pts)
+            ${isEnemy ? 'Capture territory' : 'Claim territory'}
           </button>
           <div class="conquest-hint">${
             isEnemy
-              ? 'Capture from enemy clan — earns 50 pts'
-              : 'Claim unclaimed territory — earns 25 pts'
+              ? 'Take this territory from a rival clan for your clan.'
+              : 'Claim this unclaimed territory for your clan.'
           }</div>`;
       }
       document.getElementById('conquestPanelBody').innerHTML = html;
@@ -1693,29 +2171,19 @@ create policy "update" on territory_control for update using (true) with check (
         return;
       }
 
-      // Log as activity to award pts
-      await sb.from('activities').insert({
-        user_id: session.user.id,
-        type: 'conquest',
-        value: 1,
-        points: pts,
-        label: `Captured ${t.name}`,
-      });
+      // NOTE: web captures are cosmetic (claim territory on the shared map only).
+      // Points are NOT awarded here — 'conquest' is not a valid activities type
+      // (the points trigger would reject it), and forging points client-side is
+      // a security hole. Real Conquest scoring/AP lives in the Android app's
+      // server-validated attack_territory RPC.
 
-      // Update local state
+      // Update local state + map
       conquestData[t.id] = { territory_id: t.id, clan_id: family.id, clan_name: family.name };
       const layer = conquestLayers[t.id];
       if (layer) layer.setStyle({ fillColor: CQ_MY_COLOR });
       updateConquestStats();
       showTerritoryPanel(t);
-
-      // Refresh activity feed
-      const { data: newActs } = await sb.from('activities')
-        .select('*').eq('user_id', session.user.id)
-        .order('created_at', { ascending: false }).limit(100);
-      allMyActs = newActs || [];
-      renderUI();
-      showToast(`${t.name} captured! +${pts} pts`);
+      showToast(`${t.name} captured for ${family.name}!`);
     }
 
     // Init conquest map when tab is opened
@@ -1723,6 +2191,7 @@ create policy "update" on territory_control for update using (true) with check (
     window.switchTab = function(name) {
       origSwitchTab(name);
       if (name === 'conquest') setTimeout(initConquest, 50);
+      if (name === 'league') loadLeague();
     };
 
     // Sign out (both buttons)

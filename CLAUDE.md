@@ -9,6 +9,33 @@
 
 **Important:** Always work in `Fitclan-website` for website changes. Do NOT treat them as the same project.
 
+---
+
+## ⚙️ MANDATORY: Always use the agency subagents
+
+Whenever you implement a new feature, make a non-trivial change, or whenever the user asks for review/audit, you MUST use the specialized agency subagents — do not just do it inline. This is a hard rule the user has explicitly required.
+
+- **Before a feature is "done":** spawn **Code Reviewer** (correctness/quality) and **Security Engineer** (RLS, SECURITY DEFINER RPCs, XSS, auth, exposed keys). For any database/schema/RPC change, also spawn **Database Optimizer**.
+- **During implementation:** use the matching specialist — **Frontend Developer**, **Backend Architect**, **Accessibility Auditor**, **Evidence Collector / Test Results Analyzer** (QA), etc.
+- Spawn them with clear scope + exact file paths. Treat findings as a checklist: fix or explicitly justify each before declaring work complete.
+- Applies to this repo AND `family-fitness-fun`.
+
+---
+
+## dashboard.html — authenticated web app (mirrors the Android app)
+
+`dashboard.html` is a single self-contained vanilla-JS SPA on the Supabase JS CDN. It mirrors the app EXCEPT activity logging (logging is phone-only; the **Log** tab shows a "sync via phone / Health Connect" notice instead).
+
+- **Tabs** (sidebar + a horizontally-scrollable "spinning" bottom nav): Home, Leaderboard, Conquest, Missions, League, Achievements, Log, Profile. Each `data-tab="x"` button has a `#tab-x` container; `switchTab()` toggles, lazy-loads Conquest map + League standings.
+- **Home cards:** Today's Vibe (mood/step-goal — uses `set_today_mood` + `credit_mood_goal`, counts steps **since pick** via `start_steps` delta), Weekly Clan Goal (7-day clan steps vs `families.weekly_step_goal`), Beat Your Past Self (`refresh_personal_baseline`), Rescue Missions (clan members <1000 steps today; one-tap `rescue_completions` insert, no points).
+- **Data layer:** one IIFE; state `session/profile/family/clanMembers/clanActivities/allMyActs/missions/todaysMood/rescuedToday`. Helpers `escHtml` (use for ALL user strings → XSS), `calcPts`, `computeStreak`, `switchTab`, `showToast`. `MOODS`/`MOOD_ICONS` consts must be declared BEFORE `renderUI()` runs (TDZ — they live near the top, not in the later render block).
+- **Conquest on web is cosmetic** (`territory_control` table, client upsert) — awards NO points. Real scoring is the app's server-validated `attack_territory` RPC.
+- Pages: `index.html` (marketing), `login/signup/forgot-password.html`, `dashboard.html`, `delete-account.html`, `about/privacy/terms.html`. Marketing pages use a topographic-contour background (`body::before`, see Background Design System below).
+
+## Session status / pending (shared with family-fitness-fun)
+- Run the 4 migrations + redeploy `delete-account` (see `family-fitness-fun/CLAUDE.md` → PENDING USER ACTIONS), then push BOTH repos via GitHub Desktop.
+- Security remediation applied this session (family-join lockdown, WITH CHECK policies, indexes, CORS); deferred items (JWT rotation, league RPC throttle) listed in the app CLAUDE.md.
+
 The GitHub repo for the website is: https://github.com/CodePro2113/Fitclan-website  
 User pushes via **GitHub Desktop** (cannot push directly to main from CLI).
 
@@ -73,19 +100,30 @@ Supabase JS CDN (UMD pattern):
 
 ---
 
-## Background Design System (index.html / marketing)
+## Background Design System (marketing pages)
 
-### Ambient Orbs (position: fixed, z-index: 0)
+### Topographic contour layer (replaced the old ambient orbs)
+The "ambient orbs" were removed (user: "they look vibecoded"). The site-wide
+marketing background is now a **topographic contour layer** rendered on
+`body::before` in `css/styles.css` — so every page that links `styles.css`
+(index, about, privacy, terms) gets it automatically, no per-page DOM.
 ```css
-.ambient-orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; will-change: transform; filter: blur(160px); }
-.orb-1 { /* teal, top-right, 1300px */ }
-.orb-2 { /* blue, bottom-left, 1150px */ }
-.orb-3 { display: none; /* purple removed */ }
-.orb-4 { /* amber, bottom-right, 900px */ }
+.topo-bg, body::before {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  /* layer 1: tiling teal SVG contour pattern (600px tile, stroke #00e896)
+     layer 2: radial vignette fading contours into charcoal at edges */
+  opacity: 0.065;                /* ~6% — whispers, never shouts */
+  animation: topoDrift 56s linear infinite;  /* drifts one tile, seamless */
+}
 ```
-- Aurora glow (`hero-bg-gradient`) is set to `display: none` — user hated it
-- `orbBreath` animation: slow drift + scale pulse (22–30s loops)
-- Body background: `hsl(228, 12%, 6%)` with radial gradient corners
+- **z-index: -1** keeps it behind ALL content on every page (a negative-z
+  `::before` still paints above body's own background). Do NOT reintroduce orbs.
+- `dashboard.html` has its own copy of this layer on a `.orb-bg` div (legacy
+  class name, but it's the same topo layer) — keep them in sync.
+- `topoDrift` is frozen under `@media (prefers-reduced-motion)`.
+- Body base: `hsl(228, 12%, 6%)` with radial gradient corners (still present, under the topo layer).
+- Auth pages (`login`/`signup`/`forgot-password`) use a SEPARATE local `.orb`
+  gradient-blob system in their own `<style>` — unrelated, intentionally left alone.
 
 ---
 
@@ -162,8 +200,7 @@ Uses **vanilla Leaflet 1.9.4** (NOT react-leaflet).
 ## Key Decisions Made
 
 1. **No second Netlify site** — auth/dashboard built as static HTML in Fitclan-website, NOT in a separate React deployment
-2. **No aurora glow** — user hated it, `hero-bg-gradient` is `display: none`
-3. **No purple orb** — `.orb-3 { display: none; }` 
+2. **No aurora glow, no ambient orbs** — both removed (user: orbs "look vibecoded"). Background is the topographic contour layer (see Background Design System). Do NOT reintroduce orbs.
 4. **Footer logo glitch removed** — was scrambling "FitClan" to random chars on hover; removed from `main.js`
 5. **Conquest map** — real Leaflet map, not placeholder hex tiles
 6. **Signup fields** — name, email, password, fitness source ONLY (no DOB/gender)

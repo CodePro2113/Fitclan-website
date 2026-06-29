@@ -17,10 +17,16 @@
   let lenis = null;
   try {
     lenis = new Lenis({
-      lerp: prefersReducedMotion ? 1 : 0.1,
+      // Slightly higher lerp + gentle wheel multiplier = smoother, more linear
+      // catch-up that pairs well with scrub:1 scrolly triggers (less "rubber-band"
+      // snap, no sluggish drift). Reduced-motion gets an instant (lerp:1) scroll.
+      lerp: prefersReducedMotion ? 1 : 0.12,
+      wheelMultiplier: 1,
       smoothWheel: !prefersReducedMotion,
     });
     gsap.ticker.add(t => lenis.raf(t * 1000));
+    // lagSmoothing(0) keeps Lenis and ScrollTrigger on the SAME clock so scrubbed
+    // animations track the scroll position exactly (no double-smoothing jitter).
     gsap.ticker.lagSmoothing(0);
     lenis.on('scroll', ScrollTrigger.update);
     if (prefersReducedMotion) gsap.globalTimeline.timeScale(100);
@@ -405,14 +411,8 @@
     gsap.to('.phone-frame', { rotationY: x, rotationX: y, transformPerspective: 1000, duration: .9, ease: 'power2.out' });
   });
 
-  // Ambient orbs mouse parallax
-  document.addEventListener('mousemove', e => {
-    const x = e.clientX / window.innerWidth  - .5;
-    const y = e.clientY / window.innerHeight - .5;
-    gsap.to('.orb-1', { x: x*50,  y: y*35,  duration:2.5, ease:'power1.out' });
-    gsap.to('.orb-2', { x: -x*35, y: -y*25, duration:3,   ease:'power1.out' });
-    gsap.to('.orb-3', { x: x*25,  y: y*50,  duration:3.5, ease:'power1.out' });
-  });
+  // (Ambient-orb mouse parallax removed — background is now a pure-CSS
+  //  topographic contour layer in styles.css; nothing to drive per-frame here.)
 
   // Section tag neon pulse
   document.querySelectorAll('.section-tag').forEach(tag => {
@@ -877,15 +877,7 @@
     },
   });
 
-  // Ambient orbs — deeper parallax layers with depth
-  gsap.to('.orb-1', {
-    scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 2 },
-    y: 200, x: 80, scale: 1.3,
-  });
-  gsap.to('.orb-2', {
-    scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 2.5 },
-    y: -150, x: -60, scale: 0.8,
-  });
+  // (Ambient-orb scroll parallax removed — see topographic contour layer in CSS.)
 
   // Showcase section — depth parallax on individual phones
   gsap.to('.sc-phone-item:nth-child(1) .sc-device', {
@@ -1001,26 +993,10 @@
     repeat: -1,
   });
 
-  /* ── Scroll-velocity-driven section title skew ── */
-  let scrollVelocity = 0;
-  let lastScrollY = 0;
-  let velTicker = null;
-  function trackVelocity() {
-    const cur = window.scrollY;
-    scrollVelocity = cur - lastScrollY;
-    lastScrollY = cur;
-    const titles = document.querySelectorAll('.section-title');
-    titles.forEach(t => {
-      const clamped = Math.max(-15, Math.min(15, scrollVelocity * 0.3));
-      t.style.transform = `skewY(${clamped * 0.15}deg)`;
-    });
-  }
-  if (!prefersReducedMotion) {
-    window.addEventListener('scroll', () => {
-      if (velTicker) cancelAnimationFrame(velTicker);
-      velTicker = requestAnimationFrame(trackVelocity);
-    });
-  }
+  /* ── Scroll-velocity-driven section-title skew REMOVED ──
+     It wrote .section-title transform on every scroll frame (heavy per-frame JS)
+     and produced a visible shear "wobble" that read as jank. Section titles now
+     rely purely on the smooth GSAP clip-path ink reveal + word splits. */
 
   /* ── Feature cards — premium clip-path reveal on scroll ── */
   gsap.utils.toArray('.feature-card').forEach((card, i) => {

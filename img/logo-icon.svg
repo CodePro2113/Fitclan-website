@@ -1,0 +1,44 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    FitClan — App Icon
+    Stepped figure mark (right-angle geometry, pixel-grid aesthetic)
+    64×64 viewBox · dark rounded-square background · teal figure
+  -->
+
+  <!-- Background -->
+  <rect width="64" height="64" rx="14" fill="hsl(240,3%,7%)"/>
+
+  <!--
+    Figure transform: scale(0.649) centers the raw 58×74 figure
+    (spanning x:16–74, y:4–78) into a ~38×48 region inside 64×64.
+    translate(3,5) nudges for equal margins (~13px h, ~8px v).
+    stroke-width 5 → ~3.25px rendered · linecap square + miter
+    for sharp right-angle corners throughout.
+  -->
+  <g transform="translate(3,5) scale(0.649)"
+     stroke="hsl(159,93%,50%)"
+     stroke-width="5"
+     stroke-linecap="square"
+     stroke-linejoin="miter"
+     fill="none">
+
+    <!-- Head (16×16 square) -->
+    <rect x="40" y="4" width="16" height="16"/>
+
+    <!-- Torso (16×24, 4px gap below head = neck) -->
+    <rect x="40" y="24" width="16" height="24"/>
+
+    <!-- Right arm — forward swing: goes right, steps up, continues right -->
+    <polyline points="56,30 66,30 66,18 74,18"/>
+
+    <!-- Left arm — back swing: goes left, steps down, continues left -->
+    <polyline points="40,30 28,30 28,42 16,42"/>
+
+    <!-- Right leg — forward stride: down, step right, down to foot -->
+    <polyline points="56,48 56,62 70,62 70,78"/>
+
+    <!-- Left leg — push-off: down, step left, down to foot -->
+    <polyline points="40,48 40,62 26,62 26,78"/>
+
+  </g>
+</svg>
